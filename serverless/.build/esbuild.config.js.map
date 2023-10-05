@@ -1,0 +1,1 @@
+{"version":3,"file":"esbuild.config.js","sourceRoot":"","sources":["../esbuild.config.js"],"names":[],"mappings":"AAAA,oBAAoB;AACpB,MAAM,CAAC,OAAO,GAAG;IACf,WAAW,EAAE,CAAC,YAAY,CAAC;IAC3B,MAAM,EAAE,IAAI;IACZ,OAAO,EAAE,mBAAmB;IAC5B,QAAQ,EAAE,MAAM;IAChB,MAAM,EAAE,QAAQ;CACjB,CAAC"}

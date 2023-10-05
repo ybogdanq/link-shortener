@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "@types/node": "^20.8.2",
+    "esbuild": "^0.19.4",
+    "serverless-esbuild": "^1.48.4",
+    "serverless-plugin-common-excludes": "^4.0.0",
+    "serverless-plugin-typescript": "^2.1.5",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1470.0"
+  }
+}
