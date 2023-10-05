@@ -1,9 +1,9 @@
-export const handler = async (event, ...other) => {
+module.exports.handler = async (event) => {
   return {
     statusCode: 200,
     body: JSON.stringify(
       {
-        message: "This is whole new function that might work",
+        message: "Go Serverless v3.0! Your function executed successfully!",
         input: event,
       },
       null,
