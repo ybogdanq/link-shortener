@@ -13,7 +13,7 @@ interface Props
 export const LoginPage: FC<Props> = ({ className, ...props }) => {
   return (
     <DefaultLayout {...props}>
-      <div className="max-w-sm mx-auto pt-20">
+      <div className="max-w-sm mx-auto md:pt-20">
         <Heading size="s" className="mb-3">
           Login
         </Heading>
