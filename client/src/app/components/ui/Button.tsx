@@ -7,12 +7,12 @@ interface Props
     HTMLButtonElement
   > {
   size?: "s" | "m" | "l";
-  color: "black" | "white";
+  color?: "black" | "white";
 }
 
 export const Button: FC<Props> = ({
   size = "s",
-  color,
+  color = "white",
   children,
   className,
   ...props
@@ -23,9 +23,22 @@ export const Button: FC<Props> = ({
       : size === "m"
       ? "text-sm sm:text-md md:text-lg"
       : "text-md sm:text-lg md:text-xl";
-  const defaultStyles = "";
 
-  const mergedStyles = cn(className, sizeDependentStyles, defaultStyles);
+  const colorDependentStyles =
+    color === "black"
+      ? "text-white border-black bg-black hover:text-black  hover:bg-white"
+      : color === "white"
+      ? "text-black border-black bg-white hover:text-white  hover:bg-black"
+      : "";
+
+  const defaultStyles = "font-semibold border-[1px] py-2 px-5 transition-all transition-duration-300";
+
+  const mergedStyles = cn(
+    className,
+    colorDependentStyles,
+    sizeDependentStyles,
+    defaultStyles
+  );
   return (
     <button className={mergedStyles} {...props}>
       {children}

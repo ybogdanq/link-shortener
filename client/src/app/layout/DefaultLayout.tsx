@@ -9,7 +9,7 @@ export const DefaultLayout: FC<Props> = ({ children, className, ...props }) => {
   return (
     <div className={cn(className, "flex flex-col min-h-screen")} {...props}>
       <Header />
-      <div className="container mx-auto px-5 flex-1 pt-7">{children}</div>
+      <div className="container mx-auto px-5 flex-1 pt-10">{children}</div>
     </div>
   );
 };
