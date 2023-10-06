@@ -12,6 +12,8 @@
   ],
   "rules": {
     "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/no-unused-vars": "off",
+    "no-unused-vars": "off",
     "comma-dangle": "off",
     "multiline-ternary": "off",
     "no-use-before-define": "off",

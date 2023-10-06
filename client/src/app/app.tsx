@@ -1,5 +1,11 @@
+import { AccountPage } from "./pages/account";
+
 function App() {
-  return <main>12</main>;
+  return (
+    <main>
+      <AccountPage />
+    </main>
+  );
 }
 
 export default App;
