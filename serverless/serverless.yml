@@ -1,16 +1,44 @@
 org: ybogdanq
 app: serverless-team-task
 service: serverless
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 provider:
   name: aws
   runtime: nodejs18.x
 
+plugins:
+  - serverless-esbuild # enables esbuild plugin
+
+package:
+  individually: true # an optimized package per function
+
+custom:
+  esbuild:
+    config: "./esbuild.config.cjs" # external config file
+    bundle: true
+    minify: false
+  serverlessPluginTypescript:
+    tsConfigFileLocation: "./tsconfig.build.json"
+
 functions:
   api:
-    handler: index.handler
+    handler: src/index.handler
     events:
       - httpApi:
           path: /
           method: get
+
+resources:
+  Resources:
+    CustomerTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: CustomerTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
