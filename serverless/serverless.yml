@@ -9,14 +9,15 @@ provider:
   name: aws
   runtime: nodejs18.x
   environment:
-  iam:
-    role:
-      statements:
-        - Effect: Allow
-          Action:
-            - dynamodb:*
-          Resource:
-            - arn:aws:dynamodb:us-east-1:726141157734:table/CustomerTable
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - arn:aws:dynamodb:us-east-1:726141157734:table/CustomerTable
+        - arn:aws:dynamodb:us-east-1:726141157734:table/TokenTable
+        - arn:aws:dynamodb:us-east-1:726141157734:table/CustomerTable/index/EmailIndex
+        - arn:aws:dynamodb:us-east-1:726141157734:table/TokenTable/index/RefreshTokenIndex
 
 plugins:
   - serverless-dotenv-plugin
@@ -44,7 +45,7 @@ functions:
     events:
       - httpApi:
           path: /customer/login
-          method: get
+          method: post
 
 resources:
   Resources:
@@ -62,9 +63,29 @@ resources:
           - AttributeName: id
             KeyType: HASH
         GlobalSecondaryIndexes:
-          - IndexName: EmailIndex  # Name of the secondary index
+          - IndexName: EmailIndex # Name of the secondary index
             KeySchema:
               - AttributeName: email
                 KeyType: HASH
             Projection:
-              ProjectionType: ALL  # You can customize this based on your needs
+              ProjectionType: ALL # You can customize this based on your needs
+    TokenTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TokenTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: refreshToken
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+        - IndexName: RefreshTokenIndex
+          KeySchema:
+            - AttributeName: refreshToken
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL  # You can customize this based on your needs

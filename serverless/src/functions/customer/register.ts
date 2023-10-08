@@ -1,7 +1,8 @@
 import { DynamoDB } from "aws-sdk";
 import { RegisterCustomerDto } from "../../dtos/RegisterCustomerDto";
 import { v4 } from "uuid";
-import { hash } from "bcrypt";
+import { hash } from "bcryptjs";
+import { CustomerDto } from "../../dtos/CustomerDto";
 
 console.log(process.env.JWT_ACCESS_SECRET);
 
@@ -26,8 +27,6 @@ export const handler = async (event) => {
       })
       .promise();
 
-    console.log(existingUser);
-
     if (existingUser.Items && existingUser.Items.length > 0) {
       throw new Error("User already exists");
     }
@@ -46,7 +45,7 @@ export const handler = async (event) => {
       })
       .promise();
 
-    return { status: 201, body: { user: newUser } };
+    return { status: 201, body: { user: CustomerDto(newUser) } };
   } catch (error) {
     return { status: 400, message: error.message };
   }
