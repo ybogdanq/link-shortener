@@ -3,30 +3,47 @@ app: serverless-team-task
 service: serverless
 frameworkVersion: "3"
 
+useDotenv: true
+
 provider:
   name: aws
   runtime: nodejs18.x
+  environment:
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+          Resource:
+            - arn:aws:dynamodb:us-east-1:726141157734:table/CustomerTable
 
 plugins:
-  - serverless-esbuild # enables esbuild plugin
+  - serverless-dotenv-plugin
+  - serverless-offline
+  - serverless-plugin-typescript
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+  serverlessPluginTypescript:
+    tsConfigFileLocation: "./tsconfig.build.json"
 
 package:
   individually: true # an optimized package per function
 
-custom:
-  esbuild:
-    config: "./esbuild.config.cjs" # external config file
-    bundle: true
-    minify: false
-  serverlessPluginTypescript:
-    tsConfigFileLocation: "./tsconfig.build.json"
-
 functions:
-  api:
-    handler: src/index.handler
+  register:
+    handler: src/functions/customer/register.handler
     events:
       - httpApi:
-          path: /
+          path: /customer/register
+          method: post
+  login:
+    handler: src/functions/customer/login.handler
+    events:
+      - httpApi:
+          path: /customer/login
           method: get
 
 resources:
@@ -39,6 +56,15 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: email
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: EmailIndex  # Name of the secondary index
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL  # You can customize this based on your needs
