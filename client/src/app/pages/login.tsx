@@ -2,10 +2,8 @@ import React, { DetailedHTMLProps, FC, HTMLAttributes } from "react";
 import cn from "classnames";
 import { DefaultLayout } from "app/layout/DefaultLayout";
 import { Field, Formik } from "formik";
-import { Button } from "app/components/ui/Button";
-import { Input } from "app/components/ui/Input";
-import { LoginForm } from "app/components/forms/login/LoginForm";
 import { Heading } from "app/components/ui/Heading";
+import { LoginForm } from "app/components/forms/login/LoginForm";
 
 interface Props
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {}
@@ -13,7 +11,7 @@ interface Props
 export const LoginPage: FC<Props> = ({ className, ...props }) => {
   return (
     <DefaultLayout {...props}>
-      <div className="max-w-sm mx-auto md:pt-20">
+      <div className="max-w-sm mx-auto md:pt-10">
         <Heading size="s" className="mb-3">
           Login
         </Heading>

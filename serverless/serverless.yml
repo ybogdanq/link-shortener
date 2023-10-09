@@ -27,6 +27,7 @@ plugins:
 custom:
   serverless-offline:
     httpPort: 4000
+    ignoreJWTSignature: true
   serverlessPluginTypescript:
     tsConfigFileLocation: "./tsconfig.build.json"
 
@@ -35,17 +36,26 @@ package:
 
 functions:
   register:
-    handler: src/functions/customer/register.handler
+    handler: src/functions/auth/register.handler
     events:
-      - httpApi:
-          path: /customer/register
+      - http:
+          path: /auth/register
           method: post
+          cors: true
   login:
-    handler: src/functions/customer/login.handler
+    handler: src/functions/auth/login.handler
     events:
-      - httpApi:
-          path: /customer/login
+      - http:
+          path: /auth/login
           method: post
+          cors: true
+  refreshToken:
+    handler: src/functions/auth/refreshToken.handler
+    events:
+      - http:
+          path: /auth/refreshToken
+          method: post
+          cors: true
 
 resources:
   Resources:
@@ -83,9 +93,29 @@ resources:
           - AttributeName: userId
             KeyType: HASH
         GlobalSecondaryIndexes:
-        - IndexName: RefreshTokenIndex
-          KeySchema:
-            - AttributeName: refreshToken
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL  # You can customize this based on your needs
+          - IndexName: RefreshTokenIndex
+            KeySchema:
+              - AttributeName: refreshToken
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL # You can customize this based on your needs
+    GatewayResponse:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: EXPIRED_TOKEN
+        RestApiId:
+          Ref: "ApiGatewayRestApi"
+        StatusCode: "401"
+    AuthFailureGatewayResponse:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: UNAUTHORIZED
+        RestApiId:
+          Ref: "ApiGatewayRestApi"
+        StatusCode: "401"

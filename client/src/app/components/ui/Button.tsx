@@ -6,11 +6,15 @@ interface Props
     HTMLAttributes<HTMLButtonElement>,
     HTMLButtonElement
   > {
+  type?: "submit";
   size?: "s" | "m" | "l";
   color?: "black" | "white";
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => any;
 }
 
 export const Button: FC<Props> = ({
+  onClick,
+  type,
   size = "s",
   color = "white",
   children,
@@ -31,7 +35,8 @@ export const Button: FC<Props> = ({
       ? "text-black border-black bg-white hover:text-white  hover:bg-black"
       : "";
 
-  const defaultStyles = "font-semibold border-[1px] py-2 px-5 transition-all transition-duration-300";
+  const defaultStyles =
+    "font-semibold border-[1px] py-2 px-5 transition-all transition-duration-300";
 
   const mergedStyles = cn(
     className,
@@ -40,7 +45,12 @@ export const Button: FC<Props> = ({
     defaultStyles
   );
   return (
-    <button className={mergedStyles} {...props}>
+    <button
+      onClick={onClick}
+      type={type || "button"}
+      className={mergedStyles}
+      {...props}
+    >
       {children}
     </button>
   );

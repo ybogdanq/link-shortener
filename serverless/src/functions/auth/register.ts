@@ -3,6 +3,7 @@ import { RegisterCustomerDto } from "../../dtos/RegisterCustomerDto";
 import { v4 } from "uuid";
 import { hash } from "bcryptjs";
 import { CustomerDto } from "../../dtos/CustomerDto";
+import ApiError from "../../exceptions/apiError";
 
 console.log(process.env.JWT_ACCESS_SECRET);
 
@@ -28,7 +29,7 @@ export const handler = async (event) => {
       .promise();
 
     if (existingUser.Items && existingUser.Items.length > 0) {
-      throw new Error("User already exists");
+      throw ApiError.Conflict("User already exists");
     }
 
     const newUser = {
@@ -45,8 +46,14 @@ export const handler = async (event) => {
       })
       .promise();
 
-    return { status: 201, body: { user: CustomerDto(newUser) } };
+    return {
+      statusCode: 201,
+      body: JSON.stringify({ user: CustomerDto(newUser) }),
+    };
   } catch (error) {
-    return { status: 400, message: error.message };
+    return {
+      statusCode: error?.status || 500,
+      body: error.message || "Unhandled error",
+    };
   }
 };

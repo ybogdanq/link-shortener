@@ -1,6 +1,7 @@
 import * as Yup from "yup";
 
 export const RegistrationValidationSchema = Yup.object().shape({
+  firstName: Yup.string().required().label("First Name"),
   email: Yup.string().email().required().label("Email"),
   password: Yup.string().required().label("Password"),
   phone: Yup.string().required().label("Phone"),

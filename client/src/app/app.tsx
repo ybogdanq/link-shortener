@@ -8,21 +8,22 @@ import { AccountPage } from "./pages/account";
 import { LoginPage } from "./pages/login";
 import { RegistrationPage } from "./pages/registration";
 import { useEffect } from "react";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
 
 function App() {
-  useEffect(() => {
-    console.log("something");
-  }, []);
   return (
-    <Router>
-      <Routes>
-        <Route index path="/login" element={<LoginPage />} />
-        <Route path="/registration" element={<RegistrationPage />} />
-        <Route path="/account" element={<AccountPage />} />
+    <Provider store={store}>
+      <Router>
+        <Routes>
+          <Route index path="/login" element={<LoginPage />} />
+          <Route path="/registration" element={<RegistrationPage />} />
+          <Route path="/account" element={<AccountPage />} />
 
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
-    </Router>
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      </Router>
+    </Provider>
   );
 }
 

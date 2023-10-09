@@ -1,25 +1,36 @@
-import React, { DetailedHTMLProps, FC, HTMLAttributes } from "react";
+import React, { DetailedHTMLProps, FC, HTMLAttributes, useEffect } from "react";
 import cn from "classnames";
 import { DefaultLayout } from "app/layout/DefaultLayout";
 import { Heading } from "app/components/ui/Heading";
 import { Text } from "app/components/ui/Text";
 import { Button } from "app/components/ui/Button";
+import { useAppSelector } from "app/store/store";
+import { selectUser } from "app/store/user/slice";
+import { Navigate, useNavigate } from "react-router-dom";
 
 interface Props
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {}
 
 export const AccountPage: FC<Props> = ({ className, ...props }) => {
+  const user = useAppSelector(selectUser);
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <DefaultLayout {...props}>
       <div className="mb-16">
         <Heading size="m" className="underline underline-offset-2 mb-2">
-          Welcome, User!
+          Welcome, {user.firstName}!
         </Heading>
         <Text className="mb-3">
           Here's your account pannel. Here you can manage all your recently
           created links
         </Text>
-        <Button size="s" color="black">Create new link</Button>
+        <Button size="s" color="black">
+          Create new link
+        </Button>
       </div>
       <div>
         <Heading className="mb-3" size="s" htmlEl="h2">

@@ -4,6 +4,7 @@ import { object, string } from "zod";
 export const CustomerDto = (user: IUser) => {
   return {
     id: user.id,
+    firstName: user.firstName,
     email: user.email,
     phone: user.phone,
     address: {

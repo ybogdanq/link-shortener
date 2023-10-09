@@ -9,7 +9,7 @@ interface Props extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDi
 export const RegistrationPage: FC<Props> = ({ className, ...props }) => {
   return (
     <DefaultLayout {...props}>
-      <div className="max-w-sm mx-auto md:pt-20">
+      <div className="max-w-sm mx-auto md:pt-10">
         <Heading size="s" className="mb-3">
           Registration
         </Heading>

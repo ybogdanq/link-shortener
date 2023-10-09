@@ -3,7 +3,7 @@ import cn from "classnames";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useAppSelector } from "app/store/store";
-import { selectUser } from "app/store/UserStore";
+import { selectUser } from "app/store/user/slice";
 
 interface Props
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {}
