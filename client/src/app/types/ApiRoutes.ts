@@ -1,6 +1,15 @@
 export enum ApiRoutes {
+  //USER
+  GetUser = "/dev/user/get-user",
+  //AUTH
   Login = "/dev/auth/login",
   Logout = "/dev/auth/logout",
   Register = "/dev/auth/register",
-  RefreshToken = "/auth/refresh-token",
+  RefreshToken = "/dev/auth/refresh-token",
+  //LINKS
+  GetAllLinks = "/dev/links/all",
+  CreateLink = "/dev/links/create-link",
+  DeactivateLink = "/dev/links/deactivate-link/",
+  VisitLink = "/dev/links/visit-link/",
+  DeleteLink = "/dev/links/delete-link/",
 }

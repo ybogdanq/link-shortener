@@ -5,6 +5,19 @@ import { ILoginUserAction, IRegisterUserAction } from "./types";
 import AuthService from "../../services/AuthService";
 import defineApiErrorMsg from "../../utils/defineApiErrorMsg";
 import { IUserResponse } from "../../types/User";
+import UserService from "app/services/UserService";
+
+export const getUser = createAsyncThunk<
+  AxiosResponse<IUserResponse>,
+  void,
+  { rejectValue: string }
+>("auth/getUser", async (arg, { rejectWithValue }) => {
+  try {
+    return await UserService.getUser();
+  } catch (error) {
+    return rejectWithValue(defineApiErrorMsg(error));
+  }
+});
 
 export const loginUser = createAsyncThunk<
   AxiosResponse<AuthResponse>,

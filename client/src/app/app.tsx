@@ -3,6 +3,7 @@ import {
   Route,
   BrowserRouter as Router,
   Routes,
+  useLocation,
 } from "react-router-dom";
 import { AccountPage } from "./pages/account";
 import { LoginPage } from "./pages/login";

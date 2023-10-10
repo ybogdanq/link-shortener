@@ -23,7 +23,7 @@ export const Heading: FC<Props> = ({
       : size === "m"
       ? "text-md sm:text-lg md:text-xl lg:text-2xl"
       : "text-lg sm:text-xl md:text-2xl lg:text-3xl";
-  const defaultStyles = "font-semibold";
+  const defaultStyles = "font-semibold tracking-wide";
 
   const mergedStyles = cn(className, sizeDependentStyles, defaultStyles);
 

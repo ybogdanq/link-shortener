@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../store";
-import { loginUser, logoutUser } from "./asyncActions";
+import { getUser, loginUser, logoutUser } from "./asyncActions";
 import { IUserResponse } from "app/types/User";
 
 interface UserState {
@@ -17,12 +17,16 @@ export const userSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(getUser.fulfilled, (state, { payload }) => {
+        state.user = payload.data;
+      })
       .addCase(loginUser.fulfilled, (state, { payload }) => {
         localStorage.setItem("token", payload.data.accessToken);
         state.user = payload.data.user;
       })
-      .addCase(logoutUser.fulfilled, () => {
+      .addCase(logoutUser.fulfilled, (state) => {
         localStorage.removeItem("token");
+        state.user = null;
       });
   },
 });
