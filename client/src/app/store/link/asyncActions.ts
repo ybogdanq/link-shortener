@@ -16,6 +16,18 @@ export const getAllLinks = createAsyncThunk<
   }
 });
 
+export const getLinkById = createAsyncThunk<
+  AxiosResponse<ILinkResponse>,
+  { id: string },
+  { rejectValue: string }
+>("auth/getLinkById", async ({ id }, { rejectWithValue }) => {
+  try {
+    return await LinkService.getLinkById({ id });
+  } catch (error) {
+    return rejectWithValue(defineApiErrorMsg(error));
+  }
+});
+
 export const createLink = createAsyncThunk<
   AxiosResponse<ILinkResponse>,
   ILinkRequest,
@@ -32,9 +44,11 @@ export const deactivateLink = createAsyncThunk<
   AxiosResponse<ILinkResponse>,
   { id: string },
   { rejectValue: string }
->("auth/deactivateLink", async ({ id }, { rejectWithValue }) => {
+>("auth/deactivateLink", async ({ id }, { rejectWithValue, dispatch }) => {
   try {
-    return await LinkService.deactivate({ id });
+    const linkRes = await LinkService.deactivate({ id });
+    await dispatch(getLinkById({ id }));
+    return linkRes;
   } catch (error) {
     return rejectWithValue(defineApiErrorMsg(error));
   }

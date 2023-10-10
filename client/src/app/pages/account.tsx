@@ -1,4 +1,10 @@
-import React, { DetailedHTMLProps, FC, HTMLAttributes, useEffect } from "react";
+import React, {
+  DetailedHTMLProps,
+  FC,
+  HTMLAttributes,
+  useEffect,
+  useState,
+} from "react";
 import cn from "classnames";
 import { DefaultLayout } from "app/layout/DefaultLayout";
 import { Heading } from "app/components/ui/Heading";
@@ -12,16 +18,22 @@ import {
   deactivateLink,
   deleteLink,
   getAllLinks,
+  getLinkById,
 } from "app/store/link/asyncActions";
 import { ApiRoutes } from "app/types/ApiRoutes";
+import { Modal } from "app/components/ui/Modal";
+import { CreateLinkForm } from "app/components/forms/createLink/CreateLinkForm";
+import { withAuth } from "app/utils/HOCs/withAuth";
 
 interface Props
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {}
 
-export const AccountPage: FC<Props> = ({ className, ...props }) => {
+const AccountPage: FC<Props> = ({ className, ...props }) => {
   const user = useAppSelector(selectUser);
   const links = useAppSelector(selectLinks);
   const dispatch = useAppDispatch();
+
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const onDeactivateLinkHandle = (id: string) => {
     const res = dispatch(deactivateLink({ id }));
@@ -37,23 +49,27 @@ export const AccountPage: FC<Props> = ({ className, ...props }) => {
     })();
   }, [dispatch]);
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
   return (
     <DefaultLayout {...props}>
       <div className="mb-16">
         <Heading size="m" className="underline underline-offset-2 mb-2">
-          Welcome, {user.firstName}!
+          Welcome, {user?.firstName || "User"}!
         </Heading>
         <Text className="mb-3">
           Here's your account pannel. Here you can manage all your recently
           created links
         </Text>
-        <Button size="s" color="black">
+        <Button size="s" color="black" onClick={() => setIsModalVisible(true)}>
           Create new link
         </Button>
+        <Modal
+          onClose={() => {
+            setIsModalVisible(false);
+          }}
+          isActive={isModalVisible}
+        >
+          <CreateLinkForm onSubmit={() => setIsModalVisible(false)} />
+        </Modal>
       </div>
       <div>
         <Heading className="mb-3" size="s" htmlEl="h2">
@@ -65,17 +81,26 @@ export const AccountPage: FC<Props> = ({ className, ...props }) => {
               <li key={link.id}>
                 <div className="border-[1px] border-black py-3 px-5 inline-block w-full max-w-[400px]">
                   <Text
-                    className="mb-1 whitespace-nowrap overflow-hidden text-ellipsis"
+                    className="pb-2 whitespace-nowrap overflow-scroll"
                     size="l"
                   >
-                    {link.redirectLink}
+                    {link.redirectLink.replace(/^(http|https):\/\//, "")}
                   </Text>
-                  <Text className="mb-1" size="s">
-                    Active: {link.active ? "Yes" : "No"}
-                  </Text>
-                  <Text className="mb-3" size="s">
-                    Visits: {link.visits}
-                  </Text>
+                  <div className="mb-5 [&>*+*]:mt-1">
+                    <Text size="s">Active: {link.active ? "Yes" : "No"}</Text>
+                    {link.type !== "SINGLE" && (
+                      <Text size="s">Visits: {link.visits}</Text>
+                    )}
+                    <Text size="s">
+                      Type:{" "}
+                      {link.type === "SINGLE"
+                        ? "Single entry"
+                        : "Multiple entry"}
+                    </Text>
+                    <Text size="s">
+                      Active till: {new Date(link.expiredAt).toString()}
+                    </Text>
+                  </div>
                   <Text className="mb-1" size="s">
                     <a
                       target="_blank"
@@ -86,7 +111,10 @@ export const AccountPage: FC<Props> = ({ className, ...props }) => {
                         link.id
                       }
                       rel="noreferrer"
-                      onClick={() => dispatch(visitLink({ id: link.id }))}
+                      onClick={() => {
+                        dispatch(visitLink({ id: link.id }));
+                        dispatch(getLinkById({ id: link.id }));
+                      }}
                     >
                       Visit link
                     </a>
@@ -120,3 +148,5 @@ export const AccountPage: FC<Props> = ({ className, ...props }) => {
     </DefaultLayout>
   );
 };
+
+export default withAuth(AccountPage);

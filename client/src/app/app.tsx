@@ -5,9 +5,9 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
-import { AccountPage } from "./pages/account";
-import { LoginPage } from "./pages/login";
-import { RegistrationPage } from "./pages/registration";
+import { default as AccountPage } from "./pages/account";
+import { default as LoginPage } from "./pages/login";
+import { default as RegistrationPage } from "./pages/registration";
 import { useEffect } from "react";
 import { Provider } from "react-redux";
 import { store } from "./store/store";

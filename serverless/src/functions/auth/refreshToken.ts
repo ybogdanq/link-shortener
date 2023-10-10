@@ -8,11 +8,13 @@ import {
 import { IUser } from "../../types/User";
 import { parseCookies } from "../../utils/parseCookies";
 
-export const handler = async (event) => {
+export const handler = async (event, ...rest) => {
   try {
+    console.log({ event, ...rest });
     const dynamodb = new DynamoDB.DocumentClient();
 
     const { refreshToken } = parseCookies(event);
+
     const user = validateRefreshToken<IUser>(refreshToken);
     const tokenFromDb = await findToken(refreshToken);
 
@@ -44,7 +46,7 @@ export const handler = async (event) => {
     const cookieName = "refreshToken";
     const cookieValue = userDataAndJWT.refreshToken;
     const maxAge = 30 * 24 * 60 * 60;
-    const cookieFinal = `${cookieName}=${cookieValue}; HttpOnly; Max-Age=${maxAge}; SameSite=None`;
+    const cookieFinal = `${cookieName}=${cookieValue}; HttpOnly; Max-Age=${maxAge};`;
 
     return {
       statusCode: 200,
@@ -58,6 +60,7 @@ export const handler = async (event) => {
       body: JSON.stringify(userDataAndJWT),
     };
   } catch (error) {
+    console.log(error);
     return {
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",

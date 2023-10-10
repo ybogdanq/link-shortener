@@ -8,14 +8,21 @@ useDotenv: true
 provider:
   name: aws
   runtime: nodejs18.x
+  region: eu-west-1
   environment:
   iamRoleStatements:
     - Effect: Allow
       Action:
+        - sqs:SendMessage
+        - ses:SendEmail
         - dynamodb:*
       Resource:
+        - Fn::GetAtt: [ LinkShortnerNotificationQueue, Arn ]
         - arn:aws:dynamodb:us-east-1:726141157734:table/CustomerTable
         - arn:aws:dynamodb:us-east-1:726141157734:table/TokenTable
+        - arn:aws:dynamodb:eu-west-1:726141157734:table/LinkTable
+        - arn:aws:dynamodb:eu-west-1:726141157734:table/LinkTable/index/UserIdIndex
+        - arn:aws:dynamodb:eu-west-1:726141157734:table/LinkTable/index/ExpiredAtIndex
         - arn:aws:dynamodb:us-east-1:726141157734:table/CustomerTable/index/EmailIndex
         - arn:aws:dynamodb:us-east-1:726141157734:table/TokenTable/index/RefreshTokenIndex
 
@@ -73,6 +80,13 @@ functions:
           method: get
           cors: true
   # LINKS
+  getLink:
+    handler: src/functions/link/getLink.handler
+    events:
+      - http:
+          path: /links/get-link/{id}
+          method: get
+          cors: true
   getLinksList:
     handler: src/functions/link/getList.handler
     events:
@@ -112,10 +126,29 @@ functions:
   checkExpiredLinks:
     handler: src/functions/link/checkExpired.handler
     events:
-      - schedule: rate(30 minutes)
+      - http:
+          path: /links/checkExpiredLinks
+          method: delete
+          cors: true
+    # events:
+    #   - schedule: rate(1 minute)
+  # EMAIL
+  expiredLinkNotification:
+    handler: src/functions/link/expiredLinkNotification.handler
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - LinkShortnerNotificationQueue
+              - Arn
+          batchSize: 1 # Process one message at a time
 
 resources:
   Resources:
+    LinkShortnerNotificationQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: LinkShortnerNotificationQueue
     CustomerTable:
       Type: AWS::DynamoDB::Table
       Properties:

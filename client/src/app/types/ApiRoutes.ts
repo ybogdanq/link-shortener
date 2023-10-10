@@ -7,6 +7,7 @@ export enum ApiRoutes {
   Register = "/dev/auth/register",
   RefreshToken = "/dev/auth/refresh-token",
   //LINKS
+  GetLinkById = "/dev/links/get-link/",
   GetAllLinks = "/dev/links/all",
   CreateLink = "/dev/links/create-link",
   DeactivateLink = "/dev/links/deactivate-link/",

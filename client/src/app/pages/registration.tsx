@@ -6,16 +6,12 @@ import { RegistrationForm } from "app/components/forms/registration/Registration
 import { useAppSelector } from "app/store/store";
 import { selectUser } from "app/store/user/slice";
 import { Navigate } from "react-router-dom";
+import { withoutAuth } from "app/utils/HOCs/withoutAuth";
 
 interface Props
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {}
 
-export const RegistrationPage: FC<Props> = ({ className, ...props }) => {
-  const user = useAppSelector(selectUser);
-
-  if (user) {
-    return <Navigate to="/account" replace />;
-  }
+const RegistrationPage: FC<Props> = ({ className, ...props }) => {
   return (
     <DefaultLayout {...props}>
       <div className="max-w-sm mx-auto md:pt-10">
@@ -27,3 +23,5 @@ export const RegistrationPage: FC<Props> = ({ className, ...props }) => {
     </DefaultLayout>
   );
 };
+
+export default withoutAuth(RegistrationPage);

@@ -37,7 +37,7 @@ export const handler = async (event) => {
     const cookieName = "refreshToken";
     const cookieValue = userDataAndJWT.refreshToken;
     const maxAge = 30 * 24 * 60 * 60;
-    const cookieFinal = `${cookieName}=${cookieValue}; HttpOnly; Max-Age=${maxAge}; SameSite=None`;
+    const cookieFinal = `${cookieName}=${cookieValue}; HttpOnly; Max-Age=${maxAge};`;
 
     return {
       statusCode: 200,

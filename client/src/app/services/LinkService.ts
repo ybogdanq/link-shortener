@@ -9,6 +9,14 @@ class LinkService {
     return $api.get(ApiRoutes.GetAllLinks);
   }
 
+  static async getLinkById({
+    id,
+  }: {
+    id: string;
+  }): Promise<AxiosResponse<ILinkResponse>> {
+    return $api.get(ApiRoutes.GetLinkById + id);
+  }
+
   static async create({
     redirectLink,
     numberOfDays,

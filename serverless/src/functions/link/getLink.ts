@@ -31,16 +31,6 @@ export const handler = async (event) => {
     }
     const linkData = linkQueryRes.Items[0] as Link;
 
-    const deleted = await dynamodb
-      .delete({
-        TableName: "LinkTable",
-        Key: {
-          id: linkData.id,
-        },
-        ReturnValues: "ALL_OLD",
-      })
-      .promise();
-
     return {
       statusCode: 200,
       headers: {
@@ -49,7 +39,7 @@ export const handler = async (event) => {
         "Access-Control-Allow-Credentials": true,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(deleted.Attributes),
+      body: JSON.stringify({ ...linkData }),
     };
   } catch (error) {
     return {

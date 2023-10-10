@@ -7,6 +7,7 @@ import {
   deactivateLink,
   deleteLink,
   getAllLinks,
+  getLinkById,
 } from "./asyncActions";
 
 const initialState: LinkState = {
@@ -22,7 +23,10 @@ export const linkSlice = createSlice({
         if (link.id === payload.id) {
           return {
             ...link,
-            visits: link.visits + 1,
+            visits:
+              link.type === "SINGLE" && link.visits > 1
+                ? link.visits
+                : link.visits + 1,
           };
         }
         return link;
@@ -31,19 +35,19 @@ export const linkSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(getLinkById.fulfilled, (state, { payload }) => {
+        state.links = state.links.map((link) => {
+          if (link.id === payload.data.id) {
+            return payload.data;
+          }
+          return link;
+        });
+      })
       .addCase(getAllLinks.fulfilled, (state, { payload }) => {
         state.links = payload.data;
       })
       .addCase(createLink.fulfilled, (state, { payload }) => {
         state.links.push(payload.data);
-      })
-      .addCase(deactivateLink.fulfilled, (state, { payload }) => {
-        state.links = state.links.map((link) => {
-          if (link.id === payload.data.id) {
-            return { ...link, active: false };
-          }
-          return link;
-        });
       })
       .addCase(deleteLink.fulfilled, (state, { payload }) => {
         state.links = state.links.filter((link) => link.id !== payload.data.id);
