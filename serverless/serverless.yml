@@ -56,6 +56,45 @@ functions:
           path: /auth/refreshToken
           method: post
           cors: true
+  getLinksList:
+    handler: src/functions/link/getList.handler
+    events:
+      - http:
+          path: /links/all
+          method: get
+          cors: true
+  createLink:
+    handler: src/functions/link/create.handler
+    events:
+      - http:
+          path: /links/create-link
+          method: post
+          cors: true
+  deactivateLink:
+    handler: src/functions/link/deactivate.handler
+    events:
+      - http:
+          path: /links/deactivate-link/{id}
+          method: patch
+          cors: true
+  visitLink:
+    handler: src/functions/link/visitLink.handler
+    events:
+      - http:
+          path: /links/visit-link/{id}
+          method: get
+          cors: true
+  deleteLink:
+    handler: src/functions/link/delete.handler
+    events:
+      - http:
+          path: /links/delete-link/{id}
+          method: delete
+          cors: true
+  checkExpiredLinks:
+    handler: src/functions/link/checkExpired.handler
+    events:
+      - schedule: rate(1 minute)
 
 resources:
   Resources:
@@ -98,7 +137,43 @@ resources:
               - AttributeName: refreshToken
                 KeyType: HASH
             Projection:
-              ProjectionType: ALL # You can customize this based on your needs
+              ProjectionType: ALL
+    LinkTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: LinkTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: expiredAt
+            AttributeType: N
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        GlobalSecondaryIndexes:
+          - IndexName: UserIdIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
+          - IndexName: ExpiredAtIndex
+            KeySchema:
+              - AttributeName: expiredAt
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
     GatewayResponse:
       Type: "AWS::ApiGateway::GatewayResponse"
       Properties:

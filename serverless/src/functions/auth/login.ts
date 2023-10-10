@@ -1,5 +1,4 @@
 import { DynamoDB } from "aws-sdk";
-import { RegisterCustomerDto } from "../../dtos/RegisterCustomerDto";
 import { LoginCustomerDto } from "../../dtos/LoginCustomer";
 import { compareSync } from "bcryptjs";
 import { IUser } from "../../types/User";
@@ -38,23 +37,25 @@ export const handler = async (event) => {
     const cookieName = "refreshToken";
     const cookieValue = userDataAndJWT.refreshToken;
     const maxAge = 30 * 24 * 60 * 60;
-    const cookieFinal = `${cookieName}=${cookieValue}; HttpOnly; Max-Age=${maxAge}; Secure; SameSite=None`;
+    const cookieFinal = `${cookieName}=${cookieValue}; HttpOnly; Max-Age=${maxAge}; SameSite=None`;
 
     return {
       statusCode: 200,
       headers: {
         "Set-Cookie": cookieFinal,
         "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Credentials": true,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(userDataAndJWT),
+      body: JSON.stringify({
+        ...userDataAndJWT,
+      }),
     };
   } catch (error) {
     return {
-      statusCode: error?.status || 400,
-      message: error.message,
-      errors: error.errors || [],
+      statusCode: error?.status || 500,
+      body: error.message || "Unhandled error",
     };
   }
 };
