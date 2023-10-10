@@ -4,6 +4,6 @@ export type Link = {
   type: "SINGLE" | "MULTIPLE";
   active: boolean;
   redirectLink: string;
-  visists: number;
+  visits: number;
   expiredAt: number;
 };

@@ -21,7 +21,7 @@ export const handler = async (event) => {
       type: type,
       active: true,
       redirectLink: redirectLink,
-      visists: 0,
+      visits: 0,
       expiredAt: expirationTimestamp,
     };
 

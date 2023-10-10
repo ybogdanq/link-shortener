@@ -1,5 +1,4 @@
 import { CustomerDto } from "../dtos/CustomerDto";
-import { IUser } from "./User";
 
 export interface AuthResponse {
   accessToken: string;

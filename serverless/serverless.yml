@@ -35,6 +35,15 @@ package:
   individually: true # an optimized package per function
 
 functions:
+  # USER
+  getUser:
+    handler: src/functions/user/getUser.handler
+    events:
+      - http:
+          path: /user/get-user
+          method: get
+          cors: true
+  # AUTH
   register:
     handler: src/functions/auth/register.handler
     events:
@@ -49,13 +58,21 @@ functions:
           path: /auth/login
           method: post
           cors: true
+  logout:
+    handler: src/functions/auth/logout.handler
+    events:
+      - http:
+          path: /auth/logout
+          method: post
+          cors: true
   refreshToken:
     handler: src/functions/auth/refreshToken.handler
     events:
       - http:
-          path: /auth/refreshToken
-          method: post
+          path: /auth/refresh-token
+          method: get
           cors: true
+  # LINKS
   getLinksList:
     handler: src/functions/link/getList.handler
     events:
@@ -91,10 +108,11 @@ functions:
           path: /links/delete-link/{id}
           method: delete
           cors: true
+  # CRON JOB
   checkExpiredLinks:
     handler: src/functions/link/checkExpired.handler
     events:
-      - schedule: rate(1 minute)
+      - schedule: rate(30 minutes)
 
 resources:
   Resources:

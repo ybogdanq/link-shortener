@@ -31,20 +31,28 @@ export const handler = async (event) => {
 
     const deactivateCondition =
       linkData.type === "SINGLE" || linkData.expiredAt < currentTimestamp;
+    let conditionalParams;
+
+    if (deactivateCondition) {
+      conditionalParams = {
+        UpdateExpression: "set active = :newActive",
+        ExpressionAttributeValues: { ":newActive": false },
+      };
+    } else {
+      conditionalParams = {
+        UpdateExpression: "set visits = :incrementedVisits",
+        ExpressionAttributeValues: {
+          ":incrementedVisits": linkData.visits + 1,
+        },
+      };
+    }
     await dynamodb
       .update({
         TableName: "LinkTable",
         Key: {
           id: linkData.id,
         },
-        UpdateExpression: deactivateCondition
-          ? "set active = :newActive"
-          : "set visits = :incrementedVisits",
-        ExpressionAttributeValues: {
-          ...(deactivateCondition
-            ? { ":newActive": false }
-            : { ":incrementedVisits": linkData.visists + 1 || 0 }),
-        },
+        ...conditionalParams,
         ReturnValues: "ALL_NEW",
       })
       .promise();

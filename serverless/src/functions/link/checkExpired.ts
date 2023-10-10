@@ -1,5 +1,4 @@
 import { DynamoDB } from "aws-sdk";
-import { verifyUser } from "../../utils/verifyUser";
 import { Link } from "../../types/Link";
 
 export const handler = async (event) => {

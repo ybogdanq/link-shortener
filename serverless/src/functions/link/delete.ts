@@ -16,9 +16,9 @@ export const handler = async (event) => {
     const linkQueryRes = await dynamodb
       .query({
         TableName: "LinkTable",
-        IndexName: "UserIdIndex", // Specify the GSI name
-        KeyConditionExpression: "userId = :userId", // Define the condition for the GSI key
-        FilterExpression: "id = :id", // Filter based on the 'id' attribute
+        IndexName: "UserIdIndex",
+        KeyConditionExpression: "userId = :userId",
+        FilterExpression: "id = :id",
         ExpressionAttributeValues: {
           ":userId": user.id,
           ":id": id,
