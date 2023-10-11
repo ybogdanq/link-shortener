@@ -1,0 +1,4 @@
+.env
+.build
+.esbuild
+node_modules

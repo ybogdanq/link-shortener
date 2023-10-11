@@ -44,8 +44,6 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
 
           const queueUrl: string = `https://sqs.${region}.amazonaws.com/${accountId}/${queueName}`;
 
-          console.log(queueUrl, "queueUrl");
-
           const sqsParams: SQS.SendMessageRequest = {
             QueueUrl: queueUrl,
             MessageBody: JSON.stringify({
@@ -53,6 +51,7 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
               linkId: link.id,
             }),
           };
+          console.log(sqsParams, "queueUrl");
           return sqs.sendMessage(sqsParams).promise();
         });
 

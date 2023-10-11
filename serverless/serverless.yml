@@ -15,16 +15,9 @@ provider:
       Action:
         - sqs:SendMessage
         - ses:SendEmail
+        - ses:SendRawEmail
         - dynamodb:*
-      Resource:
-        - Fn::GetAtt: [ LinkShortnerNotificationQueue, Arn ]
-        - arn:aws:dynamodb:us-east-1:726141157734:table/CustomerTable
-        - arn:aws:dynamodb:us-east-1:726141157734:table/TokenTable
-        - arn:aws:dynamodb:eu-west-1:726141157734:table/LinkTable
-        - arn:aws:dynamodb:eu-west-1:726141157734:table/LinkTable/index/UserIdIndex
-        - arn:aws:dynamodb:eu-west-1:726141157734:table/LinkTable/index/ExpiredAtIndex
-        - arn:aws:dynamodb:us-east-1:726141157734:table/CustomerTable/index/EmailIndex
-        - arn:aws:dynamodb:us-east-1:726141157734:table/TokenTable/index/RefreshTokenIndex
+      Resource: "*"
 
 plugins:
   - serverless-dotenv-plugin
@@ -126,12 +119,7 @@ functions:
   checkExpiredLinks:
     handler: src/functions/link/checkExpired.handler
     events:
-      - http:
-          path: /links/checkExpiredLinks
-          method: delete
-          cors: true
-    # events:
-    #   - schedule: rate(1 minute)
+      - schedule: rate(1 hour)
   # EMAIL
   expiredLinkNotification:
     handler: src/functions/link/expiredLinkNotification.handler
@@ -141,7 +129,7 @@ functions:
             Fn::GetAtt:
               - LinkShortnerNotificationQueue
               - Arn
-          batchSize: 1 # Process one message at a time
+          batchSize: 1
 
 resources:
   Resources:
