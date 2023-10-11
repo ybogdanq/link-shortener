@@ -61,7 +61,7 @@ export const handler = async (event) => {
     return {
       statusCode: 302,
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
         "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Credentials": true,
         "Content-Type": "application/json",

@@ -48,6 +48,12 @@ export const handler = async (event) => {
 
     return {
       statusCode: 201,
+      headers: {
+        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Credentials": true,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ user: CustomerDto(newUser) }),
     };
   } catch (error) {

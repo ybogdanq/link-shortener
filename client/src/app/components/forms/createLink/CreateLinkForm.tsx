@@ -44,13 +44,17 @@ export const CreateLinkForm: FC<Props> = ({
           })
         );
 
-        onSubmit();
+        if (res.meta.requestStatus === "rejected") {
+          return alert(res.payload);
+        }
+
         //reset
         setInitialValues({
           redirectLink: "",
           numberOfDays: 1,
           type: "SINGLE",
         });
+        onSubmit();
       }}
     >
       {({ values, setValues, errors }) => (

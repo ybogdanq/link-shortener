@@ -43,7 +43,7 @@ export const handler = async (event) => {
       statusCode: 200,
       headers: {
         "Set-Cookie": cookieFinal,
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
         "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Credentials": true,
         "Content-Type": "application/json",

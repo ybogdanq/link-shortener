@@ -12,7 +12,7 @@ export const handler = async (event) => {
       headers: {
         "Set-Cookie":
           "refreshToken=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
         "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Credentials": true,
         "Content-Type": "application/json",

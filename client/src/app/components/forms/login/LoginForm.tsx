@@ -23,7 +23,7 @@ export const LoginForm: FC<Props> = ({ className, ...props }) => {
           loginUser({ email: data.email, password: data.password })
         );
         if (res.meta.requestStatus === "rejected") {
-          return;
+          return alert(res.payload);
         }
         navigate("/account");
       }}

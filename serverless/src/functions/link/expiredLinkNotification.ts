@@ -38,6 +38,12 @@ export const handler = async (event) => {
 
     return {
       statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Credentials": true,
+        "Content-Type": "application/json",
+      },
       body: "Email sent successfully",
     };
   } catch (error) {

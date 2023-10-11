@@ -28,8 +28,7 @@ export const RegistrationForm: FC<Props> = ({ className, ...props }) => {
         console.log("sadas");
         const res = await dispatch(registerUser({ user: data }));
         if (res.meta.requestStatus === "rejected") {
-          console.log(res.payload);
-          return;
+          return alert(res.payload);
         }
         navigate("/login");
       }}
