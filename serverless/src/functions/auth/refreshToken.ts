@@ -7,6 +7,8 @@ import {
 } from "../../services/token";
 import { IUser } from "../../types/User";
 import { parseCookies } from "../../utils/parseCookies";
+import { errorResponse } from "../../utils/responses/errorResponse";
+import { successResponse } from "../../utils/responses/successResponse";
 
 export const handler = async (event, ...rest) => {
   try {
@@ -48,22 +50,17 @@ export const handler = async (event, ...rest) => {
     const maxAge = 30 * 24 * 60 * 60;
     const cookieFinal = `${cookieName}=${cookieValue}; HttpOnly; Max-Age=${maxAge};`;
 
-    return {
+    return successResponse({
       statusCode: 200,
       headers: {
         "Set-Cookie": cookieFinal,
-        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Credentials": true,
-        "Content-Type": "application/json",
       },
-      body: JSON.stringify(userDataAndJWT),
-    };
+      body: userDataAndJWT,
+    });
   } catch (error) {
-    console.log(error);
-    return {
+    return errorResponse({
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
-    };
+    });
   }
 };

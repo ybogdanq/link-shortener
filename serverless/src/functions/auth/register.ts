@@ -4,6 +4,8 @@ import { v4 } from "uuid";
 import { hash } from "bcryptjs";
 import { CustomerDto } from "../../dtos/CustomerDto";
 import ApiError from "../../exceptions/apiError";
+import { errorResponse } from "../../utils/responses/errorResponse";
+import { successResponse } from "../../utils/responses/successResponse";
 
 console.log(process.env.JWT_ACCESS_SECRET);
 
@@ -46,20 +48,14 @@ export const handler = async (event) => {
       })
       .promise();
 
-    return {
+    return successResponse({
       statusCode: 201,
-      headers: {
-        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Credentials": true,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ user: CustomerDto(newUser) }),
-    };
+      body: { user: CustomerDto(newUser) },
+    });
   } catch (error) {
-    return {
+    return errorResponse({
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
-    };
+    });
   }
 };

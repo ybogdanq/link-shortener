@@ -1,9 +1,11 @@
 import { DynamoDB } from "aws-sdk";
-import { verifyUser } from "../../utils/verifyUser";
+import { errorResponse } from "../../utils/responses/errorResponse";
+import { successResponse } from "../../utils/responses/successResponse";
 
 export const handler = async (event) => {
   try {
-    const user = verifyUser(event);
+    const { principalId: userId } = event.requestContext?.authorizer;
+    console.log("Get list of links auth User ==> ", userId);
     const dynamodb = new DynamoDB.DocumentClient();
 
     const allUserLinks = await dynamodb
@@ -11,25 +13,19 @@ export const handler = async (event) => {
         TableName: "LinkTable",
         FilterExpression: "userId = :userId",
         ExpressionAttributeValues: {
-          ":userId": user.id,
+          ":userId": userId,
         },
       })
       .promise();
 
-    return {
+    return successResponse({
       statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Credentials": true,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(allUserLinks.Items || []),
-    };
+      body: allUserLinks.Items || [],
+    });
   } catch (error) {
-    return {
+    return errorResponse({
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
-    };
+    });
   }
 };

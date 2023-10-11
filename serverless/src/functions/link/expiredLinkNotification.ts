@@ -2,6 +2,8 @@ import { DynamoDB } from "aws-sdk";
 import ApiError from "../../exceptions/apiError";
 import { IUser } from "../../types/User";
 import { sendMail } from "../../utils/sendMail";
+import { errorResponse } from "../../utils/responses/errorResponse";
+import { successResponse } from "../../utils/responses/successResponse";
 
 export const handler = async (event) => {
   try {
@@ -36,21 +38,14 @@ export const handler = async (event) => {
 
     console.log(res);
 
-    return {
+    return successResponse({
       statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Credentials": true,
-        "Content-Type": "application/json",
-      },
       body: "Email sent successfully",
-    };
+    });
   } catch (error) {
-    console.log("ERROR ===> ", error);
-    return {
+    return errorResponse({
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
-    };
+    });
   }
 };

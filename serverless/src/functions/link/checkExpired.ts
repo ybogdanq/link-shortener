@@ -1,6 +1,8 @@
 import { DynamoDB, SQS } from "aws-sdk";
 import { Link } from "../../types/Link";
 import { APIGatewayProxyHandler } from "aws-lambda";
+import { errorResponse } from "../../utils/responses/errorResponse";
+import { successResponse } from "../../utils/responses/successResponse";
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
   try {
@@ -58,20 +60,15 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
     await Promise.all(notificationPromises);
     await Promise.all(deletePromises);
 
-    return {
+
+    return successResponse({
       statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Credentials": true,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ deletedCount: linksToDelete.Count }),
-    };
+      body: { deletedCount: linksToDelete.Count },
+    });
   } catch (error) {
-    return {
+    return errorResponse({
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
-    };
+    });
   }
 };

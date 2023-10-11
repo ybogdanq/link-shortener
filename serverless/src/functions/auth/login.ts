@@ -3,6 +3,8 @@ import { LoginCustomerDto } from "../../dtos/LoginCustomer";
 import { compareSync } from "bcryptjs";
 import { IUser } from "../../types/User";
 import { serializeUserInfoAndJWT } from "../../services/token";
+import { successResponse } from "../../utils/responses/successResponse";
+import { errorResponse } from "../../utils/responses/errorResponse";
 
 export const handler = async (event) => {
   try {
@@ -39,23 +41,19 @@ export const handler = async (event) => {
     const maxAge = 30 * 24 * 60 * 60;
     const cookieFinal = `${cookieName}=${cookieValue}; HttpOnly; Max-Age=${maxAge};`;
 
-    return {
+    return successResponse({
       statusCode: 200,
       headers: {
         "Set-Cookie": cookieFinal,
-        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Credentials": true,
-        "Content-Type": "application/json",
       },
-      body: JSON.stringify({
+      body: {
         ...userDataAndJWT,
-      }),
-    };
+      },
+    });
   } catch (error) {
-    return {
+    return errorResponse({
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
-    };
+    });
   }
 };

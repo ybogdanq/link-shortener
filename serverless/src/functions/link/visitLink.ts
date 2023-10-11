@@ -1,6 +1,8 @@
 import { DynamoDB } from "aws-sdk";
 import ApiError from "../../exceptions/apiError";
 import { Link } from "../../types/Link";
+import { errorResponse } from "../../utils/responses/errorResponse";
+import { successResponse } from "../../utils/responses/successResponse";
 
 export const handler = async (event) => {
   try {
@@ -58,23 +60,20 @@ export const handler = async (event) => {
       .promise();
 
     const httpRegex = /^(http|https):\/\//;
-    return {
+
+    return successResponse({
       statusCode: 302,
       headers: {
-        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Credentials": true,
-        "Content-Type": "application/json",
         Location: httpRegex.test(linkData.redirectLink)
           ? linkData.redirectLink
           : "http://" + linkData.redirectLink,
       },
-      body: JSON.stringify({ message: "Redirecting to a new URL" }),
-    };
+      body: { message: "Redirecting to a new URL" },
+    });
   } catch (error) {
-    return {
+    return errorResponse({
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
-    };
+    });
   }
 };

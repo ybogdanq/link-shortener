@@ -1,11 +1,14 @@
 import { DynamoDB } from "aws-sdk";
-import { verifyUser } from "../../utils/verifyUser";
+
 import ApiError from "../../exceptions/apiError";
 import { Link } from "../../types/Link";
+import { errorResponse } from "../../utils/responses/errorResponse";
+import { successResponse } from "../../utils/responses/successResponse";
 
 export const handler = async (event) => {
   try {
-    const user = verifyUser(event);
+    const { principalId: userId } = event.requestContext?.authorizer;
+    console.log("Get link auth User ==> ", userId);
     const dynamodb = new DynamoDB.DocumentClient();
     const { id } = event.pathParameters;
 
@@ -20,7 +23,7 @@ export const handler = async (event) => {
         KeyConditionExpression: "userId = :userId",
         FilterExpression: "id = :id",
         ExpressionAttributeValues: {
-          ":userId": user.id,
+          ":userId": userId,
           ":id": id,
         },
       })
@@ -31,20 +34,14 @@ export const handler = async (event) => {
     }
     const linkData = linkQueryRes.Items[0] as Link;
 
-    return {
+    return successResponse({
       statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Credentials": true,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...linkData }),
-    };
+      body: { ...linkData },
+    });
   } catch (error) {
-    return {
+    return errorResponse({
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
-    };
+    });
   }
 };

@@ -20,16 +20,45 @@ provider:
       Resource: "*"
 
 plugins:
+  - serverless-auto-swagger
   - serverless-dotenv-plugin
   - serverless-offline
   - serverless-plugin-typescript
 
 custom:
+  autoswagger:
+    apiType: "http"
+    generateSwaggerOnDeploy: true
+    typefiles:
+      [
+        "./src/types/AuthorizationRes.ts",
+        "./src/types/Link.ts",
+        "./src/types/Token.ts",
+        "./src/types/User.ts",
+      ]
+    apiKeyHeaders: []
+    useStage: true
+    schemes: ["http", "https"]
+    excludeStages: ["production"]
+    useRedirectUI: true
   serverless-offline:
     httpPort: 4000
     ignoreJWTSignature: true
   serverlessPluginTypescript:
     tsConfigFileLocation: "./tsconfig.build.json"
+  commonCorsSettings:
+    origin: "https://link-shortener-8qb2.vercel.app"
+    headers:
+      - Content-Type
+      - X-Amz-Date
+      - Authorization
+      - X-Api-Key
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+    allowCredentials: true
+  authorizer:
+    name: auth
+    resultTtlInSeconds: 0
 
 package:
   individually: true # an optimized package per function
@@ -42,36 +71,40 @@ functions:
       - http:
           path: /user/get-user
           method: get
-          cors: true
+          authorizer: ${self:custom.authorizer}
+          cors: ${self:custom.commonCorsSettings}
   # AUTH
+  auth:
+    handler: src/functions/auth/authorizer.handler
   register:
     handler: src/functions/auth/register.handler
     events:
       - http:
           path: /auth/register
           method: post
-          cors: true
+          cors: ${self:custom.commonCorsSettings}
   login:
     handler: src/functions/auth/login.handler
     events:
       - http:
           path: /auth/login
           method: post
-          cors: true
+          cors: ${self:custom.commonCorsSettings}
   logout:
     handler: src/functions/auth/logout.handler
     events:
       - http:
           path: /auth/logout
           method: post
-          cors: true
+          authorizer: ${self:custom.authorizer}
+          cors: ${self:custom.commonCorsSettings}
   refreshToken:
     handler: src/functions/auth/refreshToken.handler
     events:
       - http:
           path: /auth/refresh-token
           method: get
-          cors: true
+          cors: ${self:custom.commonCorsSettings}
   # LINKS
   getLink:
     handler: src/functions/link/getLink.handler
@@ -79,42 +112,47 @@ functions:
       - http:
           path: /links/get-link/{id}
           method: get
-          cors: true
+          authorizer: ${self:custom.authorizer}
+          cors: ${self:custom.commonCorsSettings}
   getLinksList:
     handler: src/functions/link/getList.handler
     events:
       - http:
           path: /links/all
           method: get
-          cors: true
+          authorizer: ${self:custom.authorizer}
+          cors: ${self:custom.commonCorsSettings}
   createLink:
     handler: src/functions/link/create.handler
     events:
       - http:
           path: /links/create-link
           method: post
-          cors: true
+          authorizer: ${self:custom.authorizer}
+          cors: ${self:custom.commonCorsSettings}
   deactivateLink:
     handler: src/functions/link/deactivate.handler
     events:
       - http:
           path: /links/deactivate-link/{id}
           method: patch
-          cors: true
+          authorizer: ${self:custom.authorizer}
+          cors: ${self:custom.commonCorsSettings}
   visitLink:
     handler: src/functions/link/visitLink.handler
     events:
       - http:
           path: /links/visit-link/{id}
           method: get
-          cors: true
+          cors: ${self:custom.commonCorsSettings}
   deleteLink:
     handler: src/functions/link/delete.handler
     events:
       - http:
           path: /links/delete-link/{id}
           method: delete
-          cors: true
+          authorizer: ${self:custom.authorizer}
+          cors: ${self:custom.commonCorsSettings}
   # CRON JOB
   checkExpiredLinks:
     handler: src/functions/link/checkExpired.handler
@@ -213,23 +251,14 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 5
               WriteCapacityUnits: 5
-    # GatewayResponse:
-    #   Type: "AWS::ApiGateway::GatewayResponse"
-    #   Properties:
-    #     ResponseParameters:
-    #       gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-    #       gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-    #     ResponseType: EXPIRED_TOKEN
-    #     RestApiId:
-    #       Ref: "ApiGatewayRestApi"
-    #     StatusCode: "401"
-    # AuthFailureGatewayResponse:
-    #   Type: "AWS::ApiGateway::GatewayResponse"
-    #   Properties:
-    #     ResponseParameters:
-    #       gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-    #       gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-    #     ResponseType: UNAUTHORIZED
-    #     RestApiId:
-    #       Ref: "ApiGatewayRestApi"
-    #     StatusCode: "401"
+    unauthorized:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'https://link-shortener-8qb2.vercel.app'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'POST,GET,PUT,PATCH,DELETE,OPTIONS'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: UNAUTHORIZED
+        RestApiId:
+          Ref: "ApiGatewayRestApi"

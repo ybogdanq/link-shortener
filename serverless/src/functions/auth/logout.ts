@@ -1,28 +1,26 @@
 import { removeToken } from "../../services/token";
-import { verifyUser } from "../../utils/verifyUser";
+import { errorResponse } from "../../utils/responses/errorResponse";
+import { successResponse } from "../../utils/responses/successResponse";
 
 export const handler = async (event) => {
   try {
-    const user = verifyUser(event);
+    const { principalId: userId } = event.requestContext?.authorizer;
+    console.log("Deactivate link auth User ==> ", userId);
 
-    await removeToken(user.id);
+    await removeToken(userId);
 
-    return {
+    return successResponse({
       statusCode: 200,
       headers: {
         "Set-Cookie":
           "refreshToken=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT",
-        "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Credentials": true,
-        "Content-Type": "application/json",
       },
-      body: JSON.stringify({}),
-    };
+      body: {},
+    });
   } catch (error) {
-    return {
+    return errorResponse({
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
-    };
+    });
   }
 };
