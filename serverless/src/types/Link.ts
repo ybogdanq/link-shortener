@@ -1,4 +1,4 @@
-export type Link = {
+export interface Link {
   id: string;
   userId: string;
   type: "SINGLE" | "MULTIPLE";
@@ -6,4 +6,4 @@ export type Link = {
   redirectLink: string;
   visits: number;
   expiredAt: number;
-};
+}

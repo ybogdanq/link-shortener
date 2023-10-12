@@ -1,4 +1,4 @@
-export type IUser = {
+export interface IUser {
   id: string;
   firstName: string;
   email: string;
@@ -9,4 +9,4 @@ export type IUser = {
     country: string;
     street: string;
   };
-};
+}

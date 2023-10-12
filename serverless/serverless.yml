@@ -35,12 +35,15 @@ custom:
         "./src/types/Link.ts",
         "./src/types/Token.ts",
         "./src/types/User.ts",
+        "./src/types/Arguments/Auth.ts",
+        "./src/types/Arguments/Link.ts",
       ]
     apiKeyHeaders: []
-    useStage: true
+    useStage: false
     schemes: ["http", "https"]
     excludeStages: ["production"]
     useRedirectUI: true
+    basePath: "/dev"
   serverless-offline:
     httpPort: 4000
     ignoreJWTSignature: true
@@ -73,6 +76,17 @@ functions:
           method: get
           authorizer: ${self:custom.authorizer}
           cors: ${self:custom.commonCorsSettings}
+          headerParameters:
+            Authorization:
+              required: true
+              type: string
+              description: "Bearer token; acceessToken"
+          responses:
+            200:
+              description: "Will get user's actual data (user can get only it's data)"
+              bodyType: UserRes
+            400:
+              description: "User data not found; Token is not valid"
   # AUTH
   auth:
     handler: src/functions/auth/authorizer.handler
@@ -83,6 +97,13 @@ functions:
           path: /auth/register
           method: post
           cors: ${self:custom.commonCorsSettings}
+          bodyType: RegisterUserArguments
+          responses:
+            201:
+              description: "After registration user will receive it's data and both tokens (refresh, access)"
+              bodyType: AuthResponse
+            409:
+              description: "User already exists"
   login:
     handler: src/functions/auth/login.handler
     events:
@@ -90,6 +111,13 @@ functions:
           path: /auth/login
           method: post
           cors: ${self:custom.commonCorsSettings}
+          bodyType: LoginArguments
+          responses:
+            200:
+              description: "After login user will receive it's data and both tokens (refresh, access)"
+              bodyType: AuthResponse
+            400:
+              description: "User not found; Email or password is not correct"
   logout:
     handler: src/functions/auth/logout.handler
     events:
@@ -98,6 +126,11 @@ functions:
           method: post
           authorizer: ${self:custom.authorizer}
           cors: ${self:custom.commonCorsSettings}
+          headerParameters:
+            Cookie:
+              required: true
+              type: string
+              description: "Http only; Bearer token; Refresh token"
   refreshToken:
     handler: src/functions/auth/refreshToken.handler
     events:
@@ -105,6 +138,17 @@ functions:
           path: /auth/refresh-token
           method: get
           cors: ${self:custom.commonCorsSettings}
+          headerParameters:
+            Authorization:
+              required: true
+              type: string
+              description: "Bearer token; acceessToken"
+          responses:
+            200:
+              description: "After refreshing token user will receive it's data and both tokens (refresh, access)"
+              bodyType: AuthResponse
+            400:
+              description: "User data not found; Token is not valid"
   # LINKS
   getLink:
     handler: src/functions/link/getLink.handler
@@ -114,6 +158,17 @@ functions:
           method: get
           authorizer: ${self:custom.authorizer}
           cors: ${self:custom.commonCorsSettings}
+          headerParameters:
+            Authorization:
+              required: true
+              type: string
+              description: "Bearer token; acceessToken"
+          responses:
+            200:
+              description: "Will get link data"
+              bodyType: Link
+            400:
+              description: "Link not found"
   getLinksList:
     handler: src/functions/link/getList.handler
     events:
@@ -122,6 +177,15 @@ functions:
           method: get
           authorizer: ${self:custom.authorizer}
           cors: ${self:custom.commonCorsSettings}
+          headerParameters:
+            Authorization:
+              required: true
+              type: string
+              description: "Bearer token; acceessToken"
+          responses:
+            200:
+              description: "Will get all user's links data"
+              bodyType: Link
   createLink:
     handler: src/functions/link/create.handler
     events:
@@ -130,6 +194,18 @@ functions:
           method: post
           authorizer: ${self:custom.authorizer}
           cors: ${self:custom.commonCorsSettings}
+          bodyType: CreateLinkArguments
+          headerParameters:
+            Authorization:
+              required: true
+              type: string
+              description: "Bearer token; acceessToken"
+          responses:
+            200:
+              description: "Will get newly created link"
+              bodyType: Link
+            400:
+              description: "Will get an error if data passed to this lambda will not be valid"
   deactivateLink:
     handler: src/functions/link/deactivate.handler
     events:
@@ -138,6 +214,17 @@ functions:
           method: patch
           authorizer: ${self:custom.authorizer}
           cors: ${self:custom.commonCorsSettings}
+          headerParameters:
+            Authorization:
+              required: true
+              type: string
+              description: "Bearer token; acceessToken"
+          responses:
+            200:
+              description: "Will get deactivated link"
+              bodyType: Link
+            400:
+              description: "Link that might be deactivated not found"
   visitLink:
     handler: src/functions/link/visitLink.handler
     events:
@@ -145,6 +232,9 @@ functions:
           path: /links/visit-link/{id}
           method: get
           cors: ${self:custom.commonCorsSettings}
+          responses:
+            200:
+              description: "Will be redirected to link that was passed as redirection link"
   deleteLink:
     handler: src/functions/link/delete.handler
     events:
@@ -153,6 +243,17 @@ functions:
           method: delete
           authorizer: ${self:custom.authorizer}
           cors: ${self:custom.commonCorsSettings}
+          headerParameters:
+            Authorization:
+              required: true
+              type: string
+              description: "Bearer token; acceessToken"
+          responses:
+            200:
+              description: "Will get deleted link"
+              bodyType: Link
+            400:
+              description: "Link that might be deleted not found"
   # CRON JOB
   checkExpiredLinks:
     handler: src/functions/link/checkExpired.handler
