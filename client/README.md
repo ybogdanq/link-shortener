@@ -1,28 +1,20 @@
+# Application setup
 
-### Clone to local
+## Install dependencies
 
-If you prefer to do it manually with the cleaner git history
-
-```bash
-npx degit jvidalv/vital my-vital-app
-cd my-vital-app
-yarn # If you don't have yarn installed, run: npm install -g yarn
-```
-
-### Development
-
-Just run and visit http://127.0.0.1:3000/
+This template is using legacy dependencies, so we should run it with flag --legacy-deps
 
 ```bash
-yarn dev
+npm i --legacy-deps
 ```
 
-### Build
-
-To build the App, run
+## Run app
 
 ```bash
-yarn build
+npm run dev
 ```
 
-And you will see the generated file in `dist` that ready to be served.
+## Set up .env
+
+You have .env.example file so you will be able to set it up manually
+Currently we have only one dependency .env variable that uses Serverless backend.
