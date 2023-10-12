@@ -20,7 +20,7 @@ export const withAuth = (Component: any) => {
       getUser();
     }, [navigate]);
 
-    return !!data ? <Component {...props} /> : null; // Render whatever you want while the authentication occurs
+    return !!data ? <Component {...props} /> : <div className="loader"></div>; // Render whatever you want while the authentication occurs
   };
 
   return AuthenticatedComponent;
