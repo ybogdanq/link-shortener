@@ -39,11 +39,13 @@ export const handler = async (event) => {
     console.log(res);
 
     return successResponse({
+      event,
       statusCode: 200,
       body: "Email sent successfully",
     });
   } catch (error) {
     return errorResponse({
+      event,
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
     });

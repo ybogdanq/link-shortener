@@ -60,13 +60,14 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
     await Promise.all(notificationPromises);
     await Promise.all(deletePromises);
 
-
     return successResponse({
+      event,
       statusCode: 200,
       body: { deletedCount: linksToDelete.Count },
     });
   } catch (error) {
     return errorResponse({
+      event,
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
     });

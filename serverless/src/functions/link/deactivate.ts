@@ -48,11 +48,13 @@ export const handler = async (event) => {
 
 
     return successResponse({
+      event,
       statusCode: 200,
       body: res.Attributes || linkData,
     });
   } catch (error) {
     return errorResponse({
+      event,
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
     });

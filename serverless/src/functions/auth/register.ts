@@ -49,11 +49,13 @@ export const handler = async (event) => {
       .promise();
 
     return successResponse({
+      event,
       statusCode: 201,
       body: { user: CustomerDto(newUser) },
     });
   } catch (error) {
     return errorResponse({
+      event,
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
     });

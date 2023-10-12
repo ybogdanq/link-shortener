@@ -62,6 +62,7 @@ export const handler = async (event) => {
     const httpRegex = /^(http|https):\/\//;
 
     return successResponse({
+      event,
       statusCode: 302,
       headers: {
         Location: httpRegex.test(linkData.redirectLink)
@@ -72,6 +73,7 @@ export const handler = async (event) => {
     });
   } catch (error) {
     return errorResponse({
+      event,
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
     });

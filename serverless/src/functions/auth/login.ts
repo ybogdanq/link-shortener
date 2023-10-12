@@ -42,6 +42,7 @@ export const handler = async (event) => {
     const cookieFinal = `${cookieName}=${cookieValue}; HttpOnly; Max-Age=${maxAge};`;
 
     return successResponse({
+      event,
       statusCode: 200,
       headers: {
         "Set-Cookie": cookieFinal,
@@ -52,6 +53,7 @@ export const handler = async (event) => {
     });
   } catch (error) {
     return errorResponse({
+      event,
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
     });

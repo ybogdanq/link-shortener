@@ -2,9 +2,11 @@ interface ISuccessResponse {
   statusCode: number;
   headers?: { [key: string]: any };
   body: any;
+  event: any;
 }
 
 export const successResponse = ({
+  event,
   statusCode,
   headers,
   body,
@@ -12,7 +14,7 @@ export const successResponse = ({
   return {
     statusCode: statusCode,
     headers: {
-      "Access-Control-Allow-Origin": `${process.env.CLIENT_URL}`,
+      "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
       "Access-Control-Allow-Credentials": true,
       ...(headers ? headers : {}),
     },

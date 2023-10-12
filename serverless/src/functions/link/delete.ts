@@ -46,11 +46,13 @@ export const handler = async (event) => {
 
 
     return successResponse({
+      event,
       statusCode: 200,
       body: deleted.Attributes,
     });
   } catch (error) {
     return errorResponse({
+      event,
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
     });

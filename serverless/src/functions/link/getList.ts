@@ -19,11 +19,13 @@ export const handler = async (event) => {
       .promise();
 
     return successResponse({
+      event,
       statusCode: 200,
       body: allUserLinks.Items || [],
     });
   } catch (error) {
     return errorResponse({
+      event,
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
     });

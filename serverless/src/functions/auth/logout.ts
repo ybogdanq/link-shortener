@@ -10,6 +10,7 @@ export const handler = async (event) => {
     await removeToken(userId);
 
     return successResponse({
+      event,
       statusCode: 200,
       headers: {
         "Set-Cookie":
@@ -19,6 +20,7 @@ export const handler = async (event) => {
     });
   } catch (error) {
     return errorResponse({
+      event,
       statusCode: error?.status || 500,
       body: error.message || "Unhandled error",
     });
