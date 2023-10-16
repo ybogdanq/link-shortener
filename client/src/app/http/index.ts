@@ -16,6 +16,7 @@ export const $unathoriedAPI = axios.create({
 
 $api.interceptors.request.use((config) => {
   if (config && config.headers) {
+    config.headers["Access-Control-Allow-Origin"] = "*";
     config.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
     return config;
   }
