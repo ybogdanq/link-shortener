@@ -1,22 +1,23 @@
-import { DynamoDB } from "aws-sdk";
-import { LoginCustomerDto } from "../../dtos/LoginCustomer";
+import { loginCustomerDto } from "../../dtos/LoginCustomer";
 import { compareSync } from "bcryptjs";
 import { IUser } from "../../types/User";
 import { serializeUserInfoAndJWT } from "../../services/token";
 import { successResponse } from "../../utils/responses/successResponse";
-import { errorResponse } from "../../utils/responses/errorResponse";
 import * as middy from "@middy/core";
 import cors from "@middy/http-cors";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
+import { dynamodb } from "../../utils/db";
+import ApiError from "../../exceptions/apiError";
+import { QueryCommand, QueryCommandInput } from "@aws-sdk/lib-dynamodb";
+
 
 const login = async (event) => {
   const body = event.body;
-  const dynamodb = new DynamoDB.DocumentClient();
-  const { email, password } = LoginCustomerDto(body);
+  const { email, password } = loginCustomerDto(body);
 
-  const userRes = await dynamodb
-    .query({
+  const userRes = await dynamodb.send(
+    new QueryCommand({
       TableName: "CustomerTable",
       IndexName: "EmailIndex",
       KeyConditionExpression: "email = :email",
@@ -24,17 +25,21 @@ const login = async (event) => {
         ":email": email,
       },
     })
-    .promise();
+  );
 
   const user = userRes.Items ? (userRes.Items[0] as IUser) : null;
 
   if (!user) {
-    throw new Error("User or password is incorrect, please try again");
+    throw ApiError.BadRequest(
+      "User or password is incorrect, please try again"
+    );
   }
 
   const passwordsEqual = compareSync(password, user.password);
   if (!passwordsEqual)
-    throw new Error("User or password is incorrect, please try again");
+    throw ApiError.BadRequest(
+      "User or password is incorrect, please try again"
+    );
 
   const userDataAndJWT = await serializeUserInfoAndJWT(user);
 

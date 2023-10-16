@@ -1,4 +1,3 @@
-import { DynamoDB } from "aws-sdk";
 import ApiError from "../../exceptions/apiError";
 import { Link } from "../../types/Link";
 import { errorResponse } from "../../utils/responses/errorResponse";
@@ -7,22 +6,20 @@ import * as middy from "@middy/core";
 import cors from "@middy/http-cors";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
+import { dynamodb } from "../../utils/db";
+import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 export const visitLink = async (event) => {
   try {
-    const dynamodb = new DynamoDB.DocumentClient();
     const { id } = event.pathParameters;
 
     if (!id) {
       throw ApiError.BadRequest("Bad id provided");
     }
 
-    const linkQueryRes = await dynamodb
-      .get({
-        TableName: "LinkTable",
-        Key: { id },
-      })
-      .promise();
+    const linkQueryRes = await dynamodb.send(
+      new GetCommand({ TableName: "LinkTable", Key: { id } })
+    );
 
     if (!linkQueryRes.Item) {
       throw ApiError.BadRequest("Bad link id provided");
@@ -52,8 +49,8 @@ export const visitLink = async (event) => {
         },
       };
     }
-    await dynamodb
-      .update({
+    await dynamodb.send(
+      new UpdateCommand({
         TableName: "LinkTable",
         Key: {
           id: linkData.id,
@@ -61,7 +58,7 @@ export const visitLink = async (event) => {
         ...conditionalParams,
         ReturnValues: "ALL_NEW",
       })
-      .promise();
+    );
 
     const httpRegex = /^(http|https):\/\//;
 

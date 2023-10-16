@@ -1,38 +1,44 @@
-import { DynamoDB, SQS } from "aws-sdk";
 import { Link } from "../../types/Link";
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { errorResponse } from "../../utils/responses/errorResponse";
 import { successResponse } from "../../utils/responses/successResponse";
+import { SQS } from "aws-sdk";
+import { dynamodb } from "../../utils/db";
+import {
+  DeleteCommand,
+  DeleteCommandInput,
+  ScanCommand,
+  ScanCommandInput,
+} from "@aws-sdk/lib-dynamodb";
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
   try {
-    const dynamodb = new DynamoDB.DocumentClient();
     const sqs = new SQS();
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
-    const linksToDelete = await dynamodb
-      .scan({
+    const linksToDelete = await dynamodb.send(
+      new ScanCommand({
         TableName: "LinkTable",
         FilterExpression: "expiredAt < :currentTimestamp",
         ExpressionAttributeValues: {
           ":currentTimestamp": currentTimestamp,
         },
       })
-      .promise();
+    );
 
     const deletePromises = !linksToDelete.Items
       ? []
       : linksToDelete.Items.map((item) => {
           const link = item as Link;
-          return dynamodb
-            .delete({
+          return dynamodb.send(
+            new DeleteCommand({
               TableName: "LinkTable",
               Key: {
                 id: link.id,
               },
               ReturnValues: "ALL_OLD",
             })
-            .promise();
+          );
         });
 
     const notificationPromises = !linksToDelete.Items

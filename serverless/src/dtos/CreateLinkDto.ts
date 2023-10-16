@@ -1,6 +1,6 @@
 import { object, string, number, enum as enum_ } from "zod";
 
-export const CreateLinkDto = (body) => {
+export const createLinkDto = (body) => {
   const schema = object({
     type: enum_(["SINGLE", "MULTIPLE"]),
     redirectLink: string(),

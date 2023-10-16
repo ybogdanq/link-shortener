@@ -1,5 +1,3 @@
-import { DynamoDB } from "aws-sdk";
-
 import ApiError from "../../exceptions/apiError";
 import { Link } from "../../types/Link";
 import { errorResponse } from "../../utils/responses/errorResponse";
@@ -8,20 +6,21 @@ import * as middy from "@middy/core";
 import cors from "@middy/http-cors";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
+import { dynamodb } from "../../utils/db";
+import { DeleteCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 export const deleteLink = async (event) => {
   try {
     const { principalId: userId } = event.requestContext?.authorizer;
     console.log("Delete link auth User ==> ", userId);
-    const dynamodb = new DynamoDB.DocumentClient();
     const { id } = event.pathParameters;
 
     if (!id) {
       throw ApiError.BadRequest("Bad id provided");
     }
 
-    const linkQueryRes = await dynamodb
-      .query({
+    const linkQueryRes = await dynamodb.send(
+      new QueryCommand({
         TableName: "LinkTable",
         IndexName: "UserIdIndex",
         KeyConditionExpression: "userId = :userId",
@@ -31,22 +30,22 @@ export const deleteLink = async (event) => {
           ":id": id,
         },
       })
-      .promise();
+    );
 
     if (!linkQueryRes.Items || linkQueryRes.Items.length === 0) {
       throw ApiError.BadRequest("Bad link id provided");
     }
     const linkData = linkQueryRes.Items[0] as Link;
 
-    const deleted = await dynamodb
-      .delete({
+    const deleted = await dynamodb.send(
+      new DeleteCommand({
         TableName: "LinkTable",
         Key: {
           id: linkData.id,
         },
         ReturnValues: "ALL_OLD",
       })
-      .promise();
+    );
 
     return successResponse({
       event,
@@ -67,4 +66,3 @@ export const handler = middy
   .use(jsonBodyParser())
   .use(httpErrorHandler())
   .use(cors());
-

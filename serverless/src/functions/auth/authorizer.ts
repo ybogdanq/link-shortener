@@ -1,19 +1,17 @@
-import * as middy from "@middy/core";
 import * as jwt from "jsonwebtoken";
-import cors from "@middy/http-cors";
-import jsonBodyParser from "@middy/http-json-body-parser";
-import httpErrorHandler from "@middy/http-error-handler";
 
-const getApiOptions = function (event) {
-  const apiOptions: { [key: string]: any } = {};
-  const tmp = event.methodArn.split(":");
-  const apiGatewayArnTmp = tmp[5].split("/");
-  apiOptions.awsAccountId = tmp[4];
-  apiOptions.region = tmp[3];
-  apiOptions.restApiId = apiGatewayArnTmp[0];
-  apiOptions.stageName = apiGatewayArnTmp[1];
-  return apiOptions;
-};
+// Leaving here in case of debuging
+//
+// const getApiOptions = function (event) {
+//   const apiOptions: { [key: string]: any } = {};
+//   const tmp = event.methodArn.split(":");
+//   const apiGatewayArnTmp = tmp[5].split("/");
+//   apiOptions.awsAccountId = tmp[4];
+//   apiOptions.region = tmp[3];
+//   apiOptions.restApiId = apiGatewayArnTmp[0];
+//   apiOptions.stageName = apiGatewayArnTmp[1];
+//   return apiOptions;
+// };
 
 const denyPolicy = function (principalId, resource) {
   return generatePolicy(principalId, "Deny", resource);
@@ -43,15 +41,11 @@ const generatePolicy = function (principalId, effect, resource) {
 export const authorizer = (event, context, callback) => {
   const token = event.authorizationToken.replace(/Bearer /g, "");
 
-  const apiOptions = getApiOptions(event);
-  console.log("API Options", JSON.stringify(apiOptions, null, 2));
-
   jwt.verify(
     token,
     process.env.JWT_ACCESS_SECRET as string,
     (err, verified) => {
       if (err) {
-        console.error("JWT Error", err, err.stack);
         callback(null, denyPolicy("anonymous", event.methodArn));
       } else {
         callback(null, allowPolicy(verified.id, event.methodArn));

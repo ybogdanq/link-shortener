@@ -1,7 +1,7 @@
 import { IUser } from "../types/User";
 import { object, string } from "zod";
 
-export const CustomerDto = (user: IUser) => {
+export const customerDto = (user: IUser) => {
   return {
     id: user.id,
     firstName: user.firstName,

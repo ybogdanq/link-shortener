@@ -3,13 +3,6 @@ import { createTransport } from "nodemailer";
 
 const { SES_REGION, SES_ACCESS_KEY_ID, SES_SECRET_ACCESS_KEY, FROM_EMAIL } =
   process.env;
-console.log(
-  "env ====> ",
-  SES_REGION,
-  SES_ACCESS_KEY_ID,
-  SES_SECRET_ACCESS_KEY,
-  FROM_EMAIL
-);
 
 const ses = new SES({
   region: SES_REGION,

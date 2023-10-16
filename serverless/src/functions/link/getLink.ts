@@ -1,5 +1,3 @@
-import { DynamoDB } from "aws-sdk";
-
 import ApiError from "../../exceptions/apiError";
 import { Link } from "../../types/Link";
 import { errorResponse } from "../../utils/responses/errorResponse";
@@ -8,20 +6,21 @@ import * as middy from "@middy/core";
 import cors from "@middy/http-cors";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
+import { dynamodb } from "../../utils/db";
+import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 export const getLink = async (event) => {
   try {
     const { principalId: userId } = event.requestContext?.authorizer;
     console.log("Get link auth User ==> ", userId);
-    const dynamodb = new DynamoDB.DocumentClient();
     const { id } = event.pathParameters;
 
     if (!id) {
       throw ApiError.BadRequest("Bad id provided");
     }
 
-    const linkQueryRes = await dynamodb
-      .query({
+    const linkQueryRes = await dynamodb.send(
+      new QueryCommand({
         TableName: "LinkTable",
         IndexName: "UserIdIndex",
         KeyConditionExpression: "userId = :userId",
@@ -31,7 +30,7 @@ export const getLink = async (event) => {
           ":id": id,
         },
       })
-      .promise();
+    );
 
     if (!linkQueryRes.Items || linkQueryRes.Items.length === 0) {
       throw ApiError.BadRequest("Bad link id provided");

@@ -1,14 +1,15 @@
-import { DynamoDB } from "aws-sdk";
 import ApiError from "../../exceptions/apiError";
 import { IUser } from "../../types/User";
 import { sendMail } from "../../utils/sendMail";
 import { errorResponse } from "../../utils/responses/errorResponse";
 import { successResponse } from "../../utils/responses/successResponse";
+import { dynamodb } from "../../utils/db";
+import { verifyEmailIdentity } from "../../utils/verifyEmailIdentity";
+import { GetCommand } from "@aws-sdk/lib-dynamodb";
 
 export const handler = async (event) => {
   try {
-    const dynamodb = new DynamoDB.DocumentClient();
-
+    await verifyEmailIdentity();
     const record = event.Records[0];
     const messageBody = JSON.parse(record.body);
 
@@ -18,12 +19,9 @@ export const handler = async (event) => {
     console.log("LINK ID ==> ", messageBody.linkId);
 
     // Fetch user's email address from your database based on userId
-    const existingUser = await dynamodb
-      .get({
-        TableName: "CustomerTable",
-        Key: { id: userId },
-      })
-      .promise();
+    const existingUser = await dynamodb.send(
+      new GetCommand({ TableName: "CustomerTable", Key: { id: userId } })
+    );
     if (!existingUser.Item) {
       throw ApiError.BadRequest("User doesn't exist");
     }

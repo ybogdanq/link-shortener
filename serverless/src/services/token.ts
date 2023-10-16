@@ -1,15 +1,14 @@
 import * as jwt from "jsonwebtoken";
 import { IUser } from "../types/User";
-import { DynamoDB } from "aws-sdk";
 import { IToken } from "../types/Token";
 import { AuthResponse } from "../types/AuthorizationRes";
-import { CustomerDto } from "../dtos/CustomerDto";
+import { customerDto } from "../dtos/CustomerDto";
+import { dynamodb } from "../utils/db";
+import { DeleteCommand, GetCommand, PutCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 const { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET } = process.env;
 
-const dynamodb = new DynamoDB.DocumentClient();
-
-export const generateTokens = (userPayload: ReturnType<typeof CustomerDto>) => {
+export const generateTokens = (userPayload: ReturnType<typeof customerDto>) => {
   const accessToken = jwt.sign(userPayload, `${JWT_ACCESS_SECRET}`.toString(), {
     expiresIn: "30m",
   });
@@ -47,16 +46,13 @@ export const validateRefreshToken = <T>(token: string) => {
 };
 
 export const saveToken = async (userId: string, refreshToken: string) => {
-  const tokenRes = await dynamodb
-    .get({
-      TableName: "TokenTable",
-      Key: { userId: userId },
-    })
-    .promise();
+  const tokenRes = await dynamodb.send(
+    new GetCommand({ TableName: "TokenTable", Key: { userId: userId } })
+  );
 
   if (tokenRes.Item) {
-    await dynamodb
-      .update({
+    await dynamodb.send(
+      new UpdateCommand({
         TableName: "TokenTable",
         Key: { userId: userId },
         UpdateExpression: "set refreshToken = :newRefreshToken",
@@ -64,10 +60,10 @@ export const saveToken = async (userId: string, refreshToken: string) => {
           ":newRefreshToken": refreshToken,
         },
       })
-      .promise();
+    );
   } else {
-    await dynamodb
-      .put({
+    await dynamodb.send(
+      new PutCommand({
         TableName: "TokenTable",
         Item: {
           userId: userId,
@@ -76,25 +72,22 @@ export const saveToken = async (userId: string, refreshToken: string) => {
           updatedAt: new Date().toISOString(),
         },
       })
-      .promise();
+    );
   }
 };
 
 export const removeToken = async (userId: string) => {
-  const tokenData = await dynamodb
-    .delete({
-      TableName: "TokenTable",
-      Key: { userId },
-    })
-    .promise();
+  const tokenData = await dynamodb.send(
+    new DeleteCommand({ TableName: "TokenTable", Key: { userId } })
+  );
   return tokenData;
 };
 
 export const findToken = async (
   refreshToken: string
 ): Promise<IToken | null> => {
-  const tokenRes = await dynamodb
-    .scan({
+  const tokenRes = await dynamodb.send(
+    new ScanCommand({
       TableName: "TokenTable",
       IndexName: "RefreshTokenIndex",
       FilterExpression: "refreshToken = :refreshToken",
@@ -102,7 +95,7 @@ export const findToken = async (
         ":refreshToken": refreshToken,
       },
     })
-    .promise();
+  );
   const tokenData = tokenRes.Items ? (tokenRes.Items[0] as IToken) : null;
   return tokenData;
 };
@@ -110,7 +103,7 @@ export const findToken = async (
 export const serializeUserInfoAndJWT = async (
   userInfo: IUser
 ): Promise<AuthResponse> => {
-  const userDto = CustomerDto(userInfo);
+  const userDto = customerDto(userInfo);
   const tokens = generateTokens(userDto);
   await saveToken(userInfo.id, tokens.refreshToken);
 

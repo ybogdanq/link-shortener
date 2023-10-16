@@ -1,4 +1,3 @@
-import { DynamoDB } from "aws-sdk";
 import ApiError from "../../exceptions/apiError";
 import {
   findToken,
@@ -13,11 +12,12 @@ import * as middy from "@middy/core";
 import cors from "@middy/http-cors"
 import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
+import { dynamodb } from "../../utils/db";
+import { QueryCommand, QueryCommandInput } from "@aws-sdk/lib-dynamodb";
 
 export const refreshToken = async (event, ...rest) => {
   try {
     console.log({ event, ...rest });
-    const dynamodb = new DynamoDB.DocumentClient();
 
     const { refreshToken } = parseCookies(event);
 
@@ -29,8 +29,8 @@ export const refreshToken = async (event, ...rest) => {
     }
 
     //Getting current user's state in case if user updated during the session
-    const userFromDbRes = await dynamodb
-      .query({
+    const userFromDbRes = await dynamodb.send(
+      new QueryCommand({
         TableName: "CustomerTable",
         IndexName: "EmailIndex",
         KeyConditionExpression: "email = :email",
@@ -38,8 +38,7 @@ export const refreshToken = async (event, ...rest) => {
           ":email": user.email,
         },
       })
-      .promise();
-
+    );
     if (!userFromDbRes.Items || userFromDbRes.Items.length === 0) {
       throw ApiError.BadRequest("Updated user info couldn't be found...");
     }

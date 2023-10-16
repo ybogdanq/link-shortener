@@ -1,21 +1,21 @@
-import { DynamoDB } from "aws-sdk";
 import { Link } from "../../types/Link";
 import { v4 } from "uuid";
-import { CreateLinkDto } from "../../dtos/CreateLinkDto";
+import { createLinkDto } from "../../dtos/CreateLinkDto";
 import { errorResponse } from "../../utils/responses/errorResponse";
 import { successResponse } from "../../utils/responses/successResponse";
 import * as middy from "@middy/core";
 import cors from "@middy/http-cors";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
+import { dynamodb } from "../../utils/db";
+import { PutCommand } from "@aws-sdk/lib-dynamodb";
 
 export const createLink = async (event) => {
   try {
     const { principalId: userId } = event.requestContext?.authorizer;
     console.log("Create link auth User ==> ", userId);
-    const dynamodb = new DynamoDB.DocumentClient();
     const body = event.body;
-    const { redirectLink, numberOfDays, type } = CreateLinkDto(body);
+    const { redirectLink, numberOfDays, type } = createLinkDto(body);
 
     const currentTime = new Date().getTime();
     const expirationTimestamp =
@@ -31,12 +31,9 @@ export const createLink = async (event) => {
       expiredAt: expirationTimestamp,
     };
 
-    await dynamodb
-      .put({
-        TableName: "LinkTable",
-        Item: newLink,
-      })
-      .promise();
+    await dynamodb.send(
+      new PutCommand({ TableName: "LinkTable", Item: newLink })
+    );
 
     return successResponse({
       event,

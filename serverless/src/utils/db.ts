@@ -1,3 +1,9 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDB, DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  UpdateCommand,
+  UpdateCommandInput,
+} from "@aws-sdk/lib-dynamodb";
 
-export const dynamodb = new DynamoDBClient();
+const dynamoClient = new DynamoDB();
+export const dynamodb = DynamoDBDocumentClient.from(dynamoClient);
