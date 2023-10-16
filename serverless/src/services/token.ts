@@ -3,8 +3,14 @@ import { IUser } from "../types/User";
 import { IToken } from "../types/Token";
 import { AuthResponse } from "../types/AuthorizationRes";
 import { customerDto } from "../dtos/CustomerDto";
-import { dynamodb } from "../utils/db";
-import { DeleteCommand, GetCommand, PutCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { dynamodb } from "../utils/clients/db";
+import {
+  DeleteCommand,
+  GetCommand,
+  PutCommand,
+  ScanCommand,
+  UpdateCommand,
+} from "@aws-sdk/lib-dynamodb";
 
 const { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET } = process.env;
 

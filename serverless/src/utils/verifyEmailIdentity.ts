@@ -1,10 +1,9 @@
-import { SESClient, VerifyEmailIdentityCommand } from "@aws-sdk/client-ses";
+import { VerifyEmailIdentityCommand } from "@aws-sdk/client-ses";
+import { ses } from "./clients/ses";
 
 export const verifyEmailIdentity = async () => {
-  const client = new SESClient();
-  const input = {
+  const command = new VerifyEmailIdentityCommand({
     EmailAddress: process.env.FROM_EMAIL || "",
-  };
-  const command = new VerifyEmailIdentityCommand(input);
-  await client.send(command);
+  });
+  await ses.send(command);
 };

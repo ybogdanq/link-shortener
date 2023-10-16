@@ -6,59 +6,50 @@ import * as middy from "@middy/core";
 import cors from "@middy/http-cors";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
-import { dynamodb } from "../../utils/db";
+import { dynamodb } from "../../utils/clients/db";
 import { DeleteCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 export const deleteLink = async (event) => {
-  try {
-    const { principalId: userId } = event.requestContext?.authorizer;
-    console.log("Delete link auth User ==> ", userId);
-    const { id } = event.pathParameters;
+  const { principalId: userId } = event.requestContext?.authorizer;
+  const { id } = event.pathParameters;
 
-    if (!id) {
-      throw ApiError.BadRequest("Bad id provided");
-    }
-
-    const linkQueryRes = await dynamodb.send(
-      new QueryCommand({
-        TableName: "LinkTable",
-        IndexName: "UserIdIndex",
-        KeyConditionExpression: "userId = :userId",
-        FilterExpression: "id = :id",
-        ExpressionAttributeValues: {
-          ":userId": userId,
-          ":id": id,
-        },
-      })
-    );
-
-    if (!linkQueryRes.Items || linkQueryRes.Items.length === 0) {
-      throw ApiError.BadRequest("Bad link id provided");
-    }
-    const linkData = linkQueryRes.Items[0] as Link;
-
-    const deleted = await dynamodb.send(
-      new DeleteCommand({
-        TableName: "LinkTable",
-        Key: {
-          id: linkData.id,
-        },
-        ReturnValues: "ALL_OLD",
-      })
-    );
-
-    return successResponse({
-      event,
-      statusCode: 200,
-      body: deleted.Attributes,
-    });
-  } catch (error) {
-    return errorResponse({
-      event,
-      statusCode: error?.status || 500,
-      body: error.message || "Unhandled error",
-    });
+  if (!id) {
+    throw ApiError.BadRequest("Bad id provided");
   }
+
+  const linkQueryRes = await dynamodb.send(
+    new QueryCommand({
+      TableName: "LinkTable",
+      IndexName: "UserIdIndex",
+      KeyConditionExpression: "userId = :userId",
+      FilterExpression: "id = :id",
+      ExpressionAttributeValues: {
+        ":userId": userId,
+        ":id": id,
+      },
+    })
+  );
+
+  if (!linkQueryRes.Items || linkQueryRes.Items.length === 0) {
+    throw ApiError.BadRequest("Bad link id provided");
+  }
+  const linkData = linkQueryRes.Items[0] as Link;
+
+  const deleted = await dynamodb.send(
+    new DeleteCommand({
+      TableName: "LinkTable",
+      Key: {
+        id: linkData.id,
+      },
+      ReturnValues: "ALL_OLD",
+    })
+  );
+
+  return successResponse({
+    event,
+    statusCode: 200,
+    body: deleted.Attributes,
+  });
 };
 
 export const handler = middy

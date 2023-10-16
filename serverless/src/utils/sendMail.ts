@@ -1,14 +1,8 @@
-import { SES } from "aws-sdk";
+import { SES } from "@aws-sdk/client-ses";
 import { createTransport } from "nodemailer";
+import { ses } from "./clients/ses";
 
-const { SES_REGION, SES_ACCESS_KEY_ID, SES_SECRET_ACCESS_KEY, FROM_EMAIL } =
-  process.env;
-
-const ses = new SES({
-  region: SES_REGION,
-  accessKeyId: SES_ACCESS_KEY_ID,
-  secretAccessKey: SES_SECRET_ACCESS_KEY,
-});
+const { FROM_EMAIL } = process.env;
 
 const transporter = createTransport({
   SES: ses,

@@ -7,28 +7,20 @@ import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
 
 const logout = async (event) => {
-  try {
-    const { principalId: userId } = event.requestContext?.authorizer;
-    console.log("Deactivate link auth User ==> ", userId);
+  const { principalId: userId } = event.requestContext?.authorizer;
+  console.log("Deactivate link auth User ==> ", userId);
 
-    await removeToken(userId);
+  await removeToken(userId);
 
-    return successResponse({
-      event,
-      statusCode: 200,
-      headers: {
-        "Set-Cookie":
-          "refreshToken=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT",
-      },
-      body: {},
-    });
-  } catch (error) {
-    return errorResponse({
-      event,
-      statusCode: error?.status || 500,
-      body: error.message || "Unhandled error",
-    });
-  }
+  return successResponse({
+    event,
+    statusCode: 200,
+    headers: {
+      "Set-Cookie":
+        "refreshToken=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT",
+    },
+    body: {},
+  });
 };
 
 export const handler = middy

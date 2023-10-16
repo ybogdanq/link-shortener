@@ -31,20 +31,22 @@ provider:
         - X-Amz-User-Agent
         - X-Transaction-Key
         - Access-Control-Allow-Origin
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - sqs:SendMessage
-        - ses:SendEmail
-        - ses:SendRawEmail
-        - dynamodb:*
-      Resource: "*"
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - ses:SendEmail
+            - ses:SendRawEmail
+            - dynamodb:*
+          Resource: "*"
 
 plugins:
   - serverless-auto-swagger
   - serverless-dotenv-plugin
   - serverless-offline
-  - serverless-plugin-typescript
+  - serverless-esbuild
 
 custom:
   autoswagger:
@@ -68,11 +70,12 @@ custom:
   serverless-offline:
     httpPort: 4000
     ignoreJWTSignature: true
-  serverlessPluginTypescript:
-    tsConfigFileLocation: "./tsconfig.json"
   authorizer:
     name: auth
     resultTtlInSeconds: 0
+  esbuild:
+    bundle: true
+    minify: false
 
 package:
   individually: true # an optimized package per function

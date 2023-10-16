@@ -7,10 +7,9 @@ import * as middy from "@middy/core";
 import cors from "@middy/http-cors";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
-import { dynamodb } from "../../utils/db";
+import { dynamodb } from "../../utils/clients/db";
 import ApiError from "../../exceptions/apiError";
-import { QueryCommand, QueryCommandInput } from "@aws-sdk/lib-dynamodb";
-
+import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 const login = async (event) => {
   const body = event.body;
