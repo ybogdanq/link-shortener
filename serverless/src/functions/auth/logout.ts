@@ -1,8 +1,12 @@
+import * as middy from "@middy/core";
 import { removeToken } from "../../services/token";
 import { errorResponse } from "../../utils/responses/errorResponse";
 import { successResponse } from "../../utils/responses/successResponse";
+import cors from "@middy/http-cors";
+import jsonBodyParser from "@middy/http-json-body-parser";
+import httpErrorHandler from "@middy/http-error-handler";
 
-export const handler = async (event) => {
+const logout = async (event) => {
   try {
     const { principalId: userId } = event.requestContext?.authorizer;
     console.log("Deactivate link auth User ==> ", userId);
@@ -26,3 +30,9 @@ export const handler = async (event) => {
     });
   }
 };
+
+export const handler = middy
+  .default(logout)
+  .use(jsonBodyParser())
+  .use(httpErrorHandler())
+  .use(cors());

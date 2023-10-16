@@ -14,8 +14,11 @@ export const successResponse = ({
   return {
     statusCode: statusCode,
     headers: {
-      "Access-Control-Allow-Origin": process.env.CLIENT_URL || "*",
-      "Access-Control-Allow-Credentials": true,
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials" : true,
+      "Access-Control-Allow-Headers" : "*",
+      "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE",
       ...(headers ? headers : {}),
     },
     body: JSON.stringify(body),

@@ -1,24 +1,8 @@
+import * as middy from "@middy/core";
 import * as jwt from "jsonwebtoken";
-
-export const handler = (event, context, callback) => {
-  const token = event.authorizationToken.replace(/Bearer /g, "");
-
-  const apiOptions = getApiOptions(event);
-  console.log("API Options", JSON.stringify(apiOptions, null, 2));
-
-  jwt.verify(
-    token,
-    process.env.JWT_ACCESS_SECRET as string,
-    (err, verified) => {
-      if (err) {
-        console.error("JWT Error", err, err.stack);
-        callback(null, denyPolicy("anonymous", event.methodArn));
-      } else {
-        callback(null, allowPolicy(verified.id, event.methodArn));
-      }
-    }
-  );
-};
+import cors from "@middy/http-cors";
+import jsonBodyParser from "@middy/http-json-body-parser";
+import httpErrorHandler from "@middy/http-error-handler";
 
 const getApiOptions = function (event) {
   const apiOptions: { [key: string]: any } = {};
@@ -55,3 +39,25 @@ const generatePolicy = function (principalId, effect, resource) {
   }
   return authResponse;
 };
+
+export const authorizer = (event, context, callback) => {
+  const token = event.authorizationToken.replace(/Bearer /g, "");
+
+  const apiOptions = getApiOptions(event);
+  console.log("API Options", JSON.stringify(apiOptions, null, 2));
+
+  jwt.verify(
+    token,
+    process.env.JWT_ACCESS_SECRET as string,
+    (err, verified) => {
+      if (err) {
+        console.error("JWT Error", err, err.stack);
+        callback(null, denyPolicy("anonymous", event.methodArn));
+      } else {
+        callback(null, allowPolicy(verified.id, event.methodArn));
+      }
+    }
+  );
+};
+
+export const handler = authorizer;

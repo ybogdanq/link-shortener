@@ -4,8 +4,12 @@ import ApiError from "../../exceptions/apiError";
 import { Link } from "../../types/Link";
 import { errorResponse } from "../../utils/responses/errorResponse";
 import { successResponse } from "../../utils/responses/successResponse";
+import * as middy from "@middy/core";
+import cors from "@middy/http-cors";
+import jsonBodyParser from "@middy/http-json-body-parser";
+import httpErrorHandler from "@middy/http-error-handler";
 
-export const handler = async (event) => {
+export const deleteLink = async (event) => {
   try {
     const { principalId: userId } = event.requestContext?.authorizer;
     console.log("Delete link auth User ==> ", userId);
@@ -44,7 +48,6 @@ export const handler = async (event) => {
       })
       .promise();
 
-
     return successResponse({
       event,
       statusCode: 200,
@@ -58,3 +61,10 @@ export const handler = async (event) => {
     });
   }
 };
+
+export const handler = middy
+  .default(deleteLink)
+  .use(jsonBodyParser())
+  .use(httpErrorHandler())
+  .use(cors());
+

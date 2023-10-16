@@ -1,9 +1,9 @@
 class ApiError extends Error {
-  status: number;
+  statusCode: number;
   errors: any[];
-  constructor(status: number, message: string, errors: string[] = []) {
+  constructor(statusCode: number, message: string, errors: string[] = []) {
     super(message);
-    this.status = status;
+    this.statusCode = statusCode;
     this.errors = errors;
 
     Object.setPrototypeOf(this, ApiError.prototype);

@@ -6,12 +6,16 @@ import { CustomerDto } from "../../dtos/CustomerDto";
 import ApiError from "../../exceptions/apiError";
 import { errorResponse } from "../../utils/responses/errorResponse";
 import { successResponse } from "../../utils/responses/successResponse";
+import * as middy from "@middy/core";
+import cors from "@middy/http-cors";
+import jsonBodyParser from "@middy/http-json-body-parser";
+import httpErrorHandler from "@middy/http-error-handler";
 
 console.log(process.env.JWT_ACCESS_SECRET);
 
-export const handler = async (event) => {
+export const register = async (event) => {
   try {
-    const body = JSON.parse(event.body);
+    const body = event.body;
     const dynamodb = new DynamoDB.DocumentClient();
 
     const { user } = RegisterCustomerDto(body);
@@ -61,3 +65,9 @@ export const handler = async (event) => {
     });
   }
 };
+
+export const handler = middy
+  .default(register)
+  .use(jsonBodyParser())
+  .use(httpErrorHandler())
+  .use(cors());

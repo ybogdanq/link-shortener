@@ -9,8 +9,12 @@ import { IUser } from "../../types/User";
 import { parseCookies } from "../../utils/parseCookies";
 import { errorResponse } from "../../utils/responses/errorResponse";
 import { successResponse } from "../../utils/responses/successResponse";
+import * as middy from "@middy/core";
+import cors from "@middy/http-cors"
+import jsonBodyParser from "@middy/http-json-body-parser";
+import httpErrorHandler from "@middy/http-error-handler";
 
-export const handler = async (event, ...rest) => {
+export const refreshToken = async (event, ...rest) => {
   try {
     console.log({ event, ...rest });
     const dynamodb = new DynamoDB.DocumentClient();
@@ -66,3 +70,9 @@ export const handler = async (event, ...rest) => {
     });
   }
 };
+
+export const handler = middy
+  .default(refreshToken)
+  .use(jsonBodyParser())
+  .use(httpErrorHandler())
+  .use(cors());

@@ -10,6 +10,7 @@
     "outDir": ".build",
     "moduleResolution": "node",
     "lib": ["es6"],
-    "rootDir": "./"
+    "rootDir": "./",
+    "skipLibCheck": true
   }
 }

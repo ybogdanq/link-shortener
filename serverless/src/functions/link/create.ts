@@ -4,13 +4,17 @@ import { v4 } from "uuid";
 import { CreateLinkDto } from "../../dtos/CreateLinkDto";
 import { errorResponse } from "../../utils/responses/errorResponse";
 import { successResponse } from "../../utils/responses/successResponse";
+import * as middy from "@middy/core";
+import cors from "@middy/http-cors";
+import jsonBodyParser from "@middy/http-json-body-parser";
+import httpErrorHandler from "@middy/http-error-handler";
 
-export const handler = async (event) => {
+export const createLink = async (event) => {
   try {
     const { principalId: userId } = event.requestContext?.authorizer;
     console.log("Create link auth User ==> ", userId);
     const dynamodb = new DynamoDB.DocumentClient();
-    const body = JSON.parse(event.body);
+    const body = event.body;
     const { redirectLink, numberOfDays, type } = CreateLinkDto(body);
 
     const currentTime = new Date().getTime();
@@ -47,3 +51,9 @@ export const handler = async (event) => {
     });
   }
 };
+
+export const handler = middy
+  .default(createLink)
+  .use(jsonBodyParser())
+  .use(httpErrorHandler())
+  .use(cors());
