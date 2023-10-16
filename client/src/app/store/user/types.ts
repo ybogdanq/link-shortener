@@ -1,8 +1,7 @@
 import { IUserRequest, IUserResponse } from "app/types/User";
 
-export interface AuthState {
-  isAuth: boolean;
-  error: string | null;
+export interface UserState {
+  user: null | IUserResponse;
 }
 
 export interface ILoginUserAction {

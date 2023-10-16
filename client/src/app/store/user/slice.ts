@@ -1,11 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import { getUser, loginUser, logoutUser } from "./asyncActions";
-import { IUserResponse } from "app/types/User";
-
-interface UserState {
-  user: null | IUserResponse;
-}
+import { UserState } from "./types";
 
 const initialState: UserState = {
   user: null,

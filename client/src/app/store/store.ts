@@ -3,11 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import type { TypedUseSelectorHook } from "react-redux";
 import userSlice from "./user/slice";
 import linkSlice from "./link/slice";
+import loaderSlice from "./loaderSlice";
 
 export const store = configureStore({
   reducer: {
     user: userSlice,
     link: linkSlice,
+    loader: loaderSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }),
