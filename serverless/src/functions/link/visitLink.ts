@@ -8,6 +8,7 @@ import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
 import { dynamodb } from "../../utils/clients/db";
 import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DBTables } from "../../types/DBenums";
 
 export const visitLink = async (event) => {
   const { id } = event.pathParameters;
@@ -17,7 +18,7 @@ export const visitLink = async (event) => {
   }
 
   const linkQueryRes = await dynamodb.send(
-    new GetCommand({ TableName: "LinkTable", Key: { id } })
+    new GetCommand({ TableName: DBTables.LinkTable, Key: { id } })
   );
 
   if (!linkQueryRes.Item) {
@@ -50,7 +51,7 @@ export const visitLink = async (event) => {
   }
   await dynamodb.send(
     new UpdateCommand({
-      TableName: "LinkTable",
+      TableName: DBTables.LinkTable,
       Key: {
         id: linkData.id,
       },

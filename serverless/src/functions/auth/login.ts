@@ -10,6 +10,7 @@ import httpErrorHandler from "@middy/http-error-handler";
 import { dynamodb } from "../../utils/clients/db";
 import ApiError from "../../exceptions/apiError";
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { DBTables } from "../../types/DBenums";
 
 const login = async (event) => {
   const body = event.body;
@@ -17,7 +18,7 @@ const login = async (event) => {
 
   const userRes = await dynamodb.send(
     new QueryCommand({
-      TableName: "CustomerTable",
+      TableName: DBTables.CustomerTable,
       IndexName: "EmailIndex",
       KeyConditionExpression: "email = :email",
       ExpressionAttributeValues: {

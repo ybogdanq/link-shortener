@@ -9,16 +9,23 @@ import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
 import { dynamodb } from "../../utils/clients/db";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
+import { EventBridge, PutEventsCommand } from "@aws-sdk/client-eventbridge";
+
+const { SES_REGION, SES_ACCESS_KEY_ID, SES_SECRET_ACCESS_KEY } = process.env;
 
 export const createLink = async (event) => {
+  const eventbridge = new EventBridge({
+    region: SES_REGION || "",
+    credentials: {
+      accessKeyId: SES_ACCESS_KEY_ID || "",
+      secretAccessKey: SES_SECRET_ACCESS_KEY || "",
+    },
+  });
   const { principalId: userId } = event.requestContext?.authorizer;
-  console.log("Create link auth User ==> ", userId);
   const body = event.body;
   const { redirectLink, numberOfDays, type } = createLinkDto(body);
 
-  const currentTime = new Date().getTime();
-  const expirationTimestamp =
-    Math.floor(currentTime / 1000) + numberOfDays * 24 * 60 * 60;
+  const expirationTimestamp = Date.now() + numberOfDays * 24 * 60 * 60 * 1000;
 
   const newLink: Link = {
     id: v4().split("").splice(0, 6).join(""),
@@ -33,6 +40,19 @@ export const createLink = async (event) => {
   await dynamodb.send(
     new PutCommand({ TableName: "LinkTable", Item: newLink })
   );
+
+  // const res = await eventbridge.send(
+  //   new PutEventsCommand({
+  //     Entries: [
+  //       {
+  //         Detail: JSON.stringify({ id: newLink.id }),
+  //         DetailType: "Link id",
+  //         Source: "handler.createLink",
+  //         Time: new Date(expirationTimestamp),
+  //       },
+  //     ],
+  //   })
+  // );
 
   return successResponse({
     event,

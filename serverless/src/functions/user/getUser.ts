@@ -9,12 +9,13 @@ import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
 import { dynamodb } from "../../utils/clients/db";
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import { DBTables } from "../../types/DBenums";
 
 export const getUser = async (event) => {
   const { principalId: userId } = event.requestContext?.authorizer;
 
   const userFromDbRes = await dynamodb.send(
-    new GetCommand({ TableName: "CustomerTable", Key: { id: userId } })
+    new GetCommand({ TableName: DBTables.CustomerTable, Key: { id: userId } })
   );
 
   if (!userFromDbRes.Item) {

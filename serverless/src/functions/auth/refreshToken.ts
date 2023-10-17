@@ -14,6 +14,7 @@ import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
 import { dynamodb } from "../../utils/clients/db";
 import { QueryCommand, QueryCommandInput } from "@aws-sdk/lib-dynamodb";
+import { DBTables } from "../../types/DBenums";
 
 export const refreshToken = async (event, ...rest) => {
   const { refreshToken } = parseCookies(event);
@@ -28,7 +29,7 @@ export const refreshToken = async (event, ...rest) => {
   //Getting current user's state in case if user updated during the session
   const userFromDbRes = await dynamodb.send(
     new QueryCommand({
-      TableName: "CustomerTable",
+      TableName: DBTables.CustomerTable,
       IndexName: "EmailIndex",
       KeyConditionExpression: "email = :email",
       ExpressionAttributeValues: {

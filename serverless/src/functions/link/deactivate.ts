@@ -8,10 +8,13 @@ import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
 import { dynamodb } from "../../utils/clients/db";
 import { QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DBTables } from "../../types/DBenums";
+import { Handler } from "aws-lambda";
+import { deactivateLinkService } from "../../services/link";
 
-export const deactivateLink = async (event) => {
+export const deactivateLink: Handler = async (event, context) => {
   const { principalId: userId } = event.requestContext?.authorizer;
-  console.log("Deactivate link auth User ==> ", userId);
+
   const { id } = event.pathParameters;
   if (!id) {
     throw ApiError.BadRequest("Bad id provided");
@@ -19,7 +22,7 @@ export const deactivateLink = async (event) => {
 
   const linkQueryRes = await dynamodb.send(
     new QueryCommand({
-      TableName: "LinkTable",
+      TableName: DBTables.LinkTable,
       IndexName: "UserIdIndex",
       KeyConditionExpression: "userId = :userId",
       FilterExpression: "id = :id",
@@ -35,24 +38,17 @@ export const deactivateLink = async (event) => {
   }
   const linkData = linkQueryRes.Items[0] as Link;
 
-  const res = await dynamodb.send(
-    new UpdateCommand({
-      TableName: "LinkTable",
-      Key: {
-        id: linkData.id,
-      },
-      UpdateExpression: "set active = :newActive",
-      ExpressionAttributeValues: {
-        ":newActive": false,
-      },
-      ReturnValues: "ALL_NEW",
-    })
+  console.log(context);
+
+  const deactivatedLink = await deactivateLinkService(
+    linkData.id,
+    context.invokedFunctionArn
   );
 
   return successResponse({
     event,
     statusCode: 200,
-    body: res.Attributes || linkData,
+    body: deactivatedLink || linkData,
   });
 };
 

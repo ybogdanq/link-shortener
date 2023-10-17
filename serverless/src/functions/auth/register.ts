@@ -16,6 +16,7 @@ import {
   QueryCommand,
   QueryCommandInput,
 } from "@aws-sdk/lib-dynamodb";
+import { DBTables } from "../../types/DBenums";
 
 console.log(process.env.JWT_ACCESS_SECRET);
 
@@ -29,7 +30,7 @@ export const register = async (event) => {
 
   const existingUser = await dynamodb.send(
     new QueryCommand({
-      TableName: "CustomerTable",
+      TableName: DBTables.CustomerTable,
       IndexName: "EmailIndex",
       KeyConditionExpression: "email = :email",
       ExpressionAttributeValues: {

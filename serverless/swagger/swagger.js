@@ -17,10 +17,29 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "type": "string",
+            "description": "Bearer token; acceessToken"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "200 response"
+            "description": "Will get user's actual data (user can get only it's data)",
+            "schema": {
+              "$ref": "#/definitions/UserRes"
+            }
+          },
+          "400": {
+            "description": "User data not found; Token is not valid"
           }
         }
       }
@@ -36,10 +55,31 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Body required in the request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterUserArguments"
+            }
+          }
+        ],
         "responses": {
-          "200": {
-            "description": "200 response"
+          "201": {
+            "description": "After registration user will receive it's data and both tokens (refresh, access)",
+            "schema": {
+              "$ref": "#/definitions/AuthResponse"
+            }
+          },
+          "409": {
+            "description": "User already exists"
           }
         }
       }
@@ -55,10 +95,31 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Body required in the request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LoginArguments"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "200 response"
+            "description": "After login user will receive it's data and both tokens (refresh, access)",
+            "schema": {
+              "$ref": "#/definitions/AuthResponse"
+            }
+          },
+          "400": {
+            "description": "User not found; Email or password is not correct"
           }
         }
       }
@@ -74,7 +135,20 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Cookie",
+            "required": false,
+            "type": "string",
+            "description": "Http only; Bearer token; Refresh token"
+          }
+        ],
         "responses": {
           "200": {
             "description": "200 response"
@@ -93,10 +167,29 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "type": "string",
+            "description": "Bearer token; acceessToken"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "200 response"
+            "description": "After refreshing token user will receive it's data and both tokens (refresh, access)",
+            "schema": {
+              "$ref": "#/definitions/AuthResponse"
+            }
+          },
+          "400": {
+            "description": "User data not found; Token is not valid"
           }
         }
       }
@@ -112,17 +205,35 @@
         "produces": [
           "application/json"
         ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "type": "string",
+            "description": "Bearer token; acceessToken"
           }
         ],
         "responses": {
           "200": {
-            "description": "200 response"
+            "description": "Will get link data",
+            "schema": {
+              "$ref": "#/definitions/Link"
+            }
+          },
+          "400": {
+            "description": "Link not found"
           }
         }
       }
@@ -138,10 +249,26 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "type": "string",
+            "description": "Bearer token; acceessToken"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "200 response"
+            "description": "Will get all user's links data",
+            "schema": {
+              "$ref": "#/definitions/Link"
+            }
           }
         }
       }
@@ -157,10 +284,38 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Body required in the request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateLinkArguments"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "type": "string",
+            "description": "Bearer token; acceessToken"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "200 response"
+            "description": "Will get newly created link",
+            "schema": {
+              "$ref": "#/definitions/Link"
+            }
+          },
+          "400": {
+            "description": "Will get an error if data passed to this lambda will not be valid"
           }
         }
       }
@@ -176,17 +331,35 @@
         "produces": [
           "application/json"
         ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "type": "string",
+            "description": "Bearer token; acceessToken"
           }
         ],
         "responses": {
           "200": {
-            "description": "200 response"
+            "description": "Will get deactivated link",
+            "schema": {
+              "$ref": "#/definitions/Link"
+            }
+          },
+          "400": {
+            "description": "Link that might be deactivated not found"
           }
         }
       }
@@ -202,6 +375,11 @@
         "produces": [
           "application/json"
         ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -212,7 +390,7 @@
         ],
         "responses": {
           "200": {
-            "description": "200 response"
+            "description": "Will be redirected to link that was passed as redirection link"
           }
         }
       }
@@ -228,17 +406,35 @@
         "produces": [
           "application/json"
         ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "type": "string",
+            "description": "Bearer token; acceessToken"
           }
         ],
         "responses": {
           "200": {
-            "description": "200 response"
+            "description": "Will get deleted link",
+            "schema": {
+              "$ref": "#/definitions/Link"
+            }
+          },
+          "400": {
+            "description": "Link that might be deleted not found"
           }
         }
       }
@@ -529,10 +725,12 @@
       "type": "array"
     }
   },
-  "securityDefinitions": {},
-  "basePath": "/dev",
-  "schemes": [
-    "http",
-    "https"
-  ]
+  "securityDefinitions": {
+    "Authorization": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "basePath": "/dev"
 };

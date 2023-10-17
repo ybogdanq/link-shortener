@@ -11,6 +11,7 @@ import {
   ScanCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { DBTables } from "../types/DBenums";
 
 const { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET } = process.env;
 
@@ -53,13 +54,13 @@ export const validateRefreshToken = <T>(token: string) => {
 
 export const saveToken = async (userId: string, refreshToken: string) => {
   const tokenRes = await dynamodb.send(
-    new GetCommand({ TableName: "TokenTable", Key: { userId: userId } })
+    new GetCommand({ TableName: DBTables.TokenTable, Key: { userId: userId } })
   );
 
   if (tokenRes.Item) {
     await dynamodb.send(
       new UpdateCommand({
-        TableName: "TokenTable",
+        TableName: DBTables.TokenTable,
         Key: { userId: userId },
         UpdateExpression: "set refreshToken = :newRefreshToken",
         ExpressionAttributeValues: {
@@ -70,7 +71,7 @@ export const saveToken = async (userId: string, refreshToken: string) => {
   } else {
     await dynamodb.send(
       new PutCommand({
-        TableName: "TokenTable",
+        TableName: DBTables.TokenTable,
         Item: {
           userId: userId,
           refreshToken: refreshToken,
@@ -94,7 +95,7 @@ export const findToken = async (
 ): Promise<IToken | null> => {
   const tokenRes = await dynamodb.send(
     new ScanCommand({
-      TableName: "TokenTable",
+      TableName: DBTables.TokenTable,
       IndexName: "RefreshTokenIndex",
       FilterExpression: "refreshToken = :refreshToken",
       ExpressionAttributeValues: {

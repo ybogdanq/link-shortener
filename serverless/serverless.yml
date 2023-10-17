@@ -51,7 +51,6 @@ plugins:
 custom:
   autoswagger:
     apiType: "http"
-    generateSwaggerOnDeploy: true
     typefiles:
       [
         "./src/types/AuthorizationRes.ts",
@@ -61,11 +60,8 @@ custom:
         "./src/types/Arguments/Auth.ts",
         "./src/types/Arguments/Link.ts",
       ]
-    apiKeyHeaders: []
-    useStage: false
-    schemes: ["http", "https"]
+    apiKeyHeaders: ["Authorization"]
     excludeStages: ["production"]
-    useRedirectUI: true
     basePath: "/dev"
   serverless-offline:
     httpPort: 4000
@@ -89,17 +85,16 @@ functions:
           path: /user/get-user
           method: get
           authorizer: ${self:custom.authorizer}
-          # headerParameters:
-          #   Authorization:
-          #     required: true
-          #     type: string
-          #     description: "Bearer token; acceessToken"
-          # responses:
-          #   200:
-          #     description: "Will get user's actual data (user can get only it's data)"
-          #     bodyType: UserRes
-          #   400:
-          #     description: "User data not found; Token is not valid"
+          headerParameters:
+            Authorization:
+              type: string
+              description: "Bearer token; acceessToken"
+          responseData:
+            200:
+              description: "Will get user's actual data (user can get only it's data)"
+              bodyType: UserRes
+            400:
+              description: "User data not found; Token is not valid"
   # AUTH
   auth:
     handler: src/functions/auth/authorizer.handler
@@ -109,26 +104,26 @@ functions:
       - http:
           path: /auth/register
           method: post
-          # bodyType: RegisterUserArguments
-          # responses:
-          #   201:
-          #     description: "After registration user will receive it's data and both tokens (refresh, access)"
-          #     bodyType: AuthResponse
-          #   409:
-          #     description: "User already exists"
+          bodyType: RegisterUserArguments
+          responseData:
+            201:
+              description: "After registration user will receive it's data and both tokens (refresh, access)"
+              bodyType: AuthResponse
+            409:
+              description: "User already exists"
   login:
     handler: src/functions/auth/login.handler
     events:
       - http:
           path: /auth/login
           method: post
-          # bodyType: LoginArguments
-          # responses:
-          #   200:
-          #     description: "After login user will receive it's data and both tokens (refresh, access)"
-          #     bodyType: AuthResponse
-          #   400:
-          #     description: "User not found; Email or password is not correct"
+          bodyType: LoginArguments
+          responseData:
+            200:
+              description: "After login user will receive it's data and both tokens (refresh, access)"
+              bodyType: AuthResponse
+            400:
+              description: "User not found; Email or password is not correct"
   logout:
     handler: src/functions/auth/logout.handler
     events:
@@ -136,28 +131,26 @@ functions:
           path: /auth/logout
           method: post
           authorizer: ${self:custom.authorizer}
-          # headerParameters:
-          #   Cookie:
-          #     required: true
-          #     type: string
-          #     description: "Http only; Bearer token; Refresh token"
+          headerParameters:
+            Cookie:
+              type: string
+              description: "Http only; Bearer token; Refresh token"
   refreshToken:
     handler: src/functions/auth/refreshToken.handler
     events:
       - http:
           path: /auth/refresh-token
           method: get
-          # headerParameters:
-          #   Authorization:
-          #     required: true
-          #     type: string
-          #     description: "Bearer token; acceessToken"
-          # responses:
-          #   200:
-          #     description: "After refreshing token user will receive it's data and both tokens (refresh, access)"
-          #     bodyType: AuthResponse
-          #   400:
-          #     description: "User data not found; Token is not valid"
+          headerParameters:
+            Authorization:
+              type: string
+              description: "Bearer token; acceessToken"
+          responseData:
+            200:
+              description: "After refreshing token user will receive it's data and both tokens (refresh, access)"
+              bodyType: AuthResponse
+            400:
+              description: "User data not found; Token is not valid"
   # LINKS
   getLink:
     handler: src/functions/link/getLink.handler
@@ -166,17 +159,16 @@ functions:
           path: /links/get-link/{id}
           method: get
           authorizer: ${self:custom.authorizer}
-          # headerParameters:
-          #   Authorization:
-          #     required: true
-          #     type: string
-          #     description: "Bearer token; acceessToken"
-          # responses:
-          #   200:
-          #     description: "Will get link data"
-          #     bodyType: Link
-          #   400:
-          #     description: "Link not found"
+          headerParameters:
+            Authorization:
+              type: string
+              description: "Bearer token; acceessToken"
+          responseData:
+            200:
+              description: "Will get link data"
+              bodyType: Link
+            400:
+              description: "Link not found"
   getLinksList:
     handler: src/functions/link/getList.handler
     events:
@@ -184,15 +176,14 @@ functions:
           path: /links/all
           method: get
           authorizer: ${self:custom.authorizer}
-          # headerParameters:
-          #   Authorization:
-          #     required: true
-          #     type: string
-          #     description: "Bearer token; acceessToken"
-          # responses:
-          #   200:
-          #     description: "Will get all user's links data"
-          #     bodyType: Link
+          headerParameters:
+            Authorization:
+              type: string
+              description: "Bearer token; acceessToken"
+          responseData:
+            200:
+              description: "Will get all user's links data"
+              bodyType: Link
   createLink:
     handler: src/functions/link/create.handler
     events:
@@ -200,18 +191,17 @@ functions:
           path: /links/create-link
           method: post
           authorizer: ${self:custom.authorizer}
-          # bodyType: CreateLinkArguments
-          # headerParameters:
-          #   Authorization:
-          #     required: true
-          #     type: string
-          #     description: "Bearer token; acceessToken"
-          # responseParameters:
-          #   200:
-          #     description: "Will get newly created link"
-          #     bodyType: Link
-          #   400:
-          #     description: "Will get an error if data passed to this lambda will not be valid"
+          bodyType: CreateLinkArguments
+          headerParameters:
+            Authorization:
+              type: string
+              description: "Bearer token; acceessToken"
+          responseData:
+            200:
+              description: "Will get newly created link"
+              bodyType: Link
+            400:
+              description: "Will get an error if data passed to this lambda will not be valid"
   deactivateLink:
     handler: src/functions/link/deactivate.handler
     events:
@@ -219,26 +209,25 @@ functions:
           path: /links/deactivate-link/{id}
           method: patch
           authorizer: ${self:custom.authorizer}
-          # headerParameters:
-          #   Authorization:
-          #     required: true
-          #     type: string
-          #     description: "Bearer token; acceessToken"
-          # responses:
-          #   200:
-          #     description: "Will get deactivated link"
-          #     bodyType: Link
-          #   400:
-          #     description: "Link that might be deactivated not found"
+          headerParameters:
+            Authorization:
+              type: string
+              description: "Bearer token; acceessToken"
+          responseData:
+            200:
+              description: "Will get deactivated link"
+              bodyType: Link
+            400:
+              description: "Link that might be deactivated not found"
   visitLink:
     handler: src/functions/link/visitLink.handler
     events:
       - http:
           path: /links/visit-link/{id}
           method: get
-          # responses:
-          #   200:
-          #     description: "Will be redirected to link that was passed as redirection link"
+          responseData:
+            200:
+              description: "Will be redirected to link that was passed as redirection link"
   deleteLink:
     handler: src/functions/link/delete.handler
     events:
@@ -246,22 +235,27 @@ functions:
           path: /links/delete-link/{id}
           method: delete
           authorizer: ${self:custom.authorizer}
-          # headerParameters:
-          #   Authorization:
-          #     required: true
-          #     type: string
-          #     description: "Bearer token; acceessToken"
-          # responses:
-          #   200:
-          #     description: "Will get deleted link"
-          #     bodyType: Link
-          #   400:
-          #     description: "Link that might be deleted not found"
+          headerParameters:
+            Authorization:
+              type: string
+              description: "Bearer token; acceessToken"
+          responseData:
+            200:
+              description: "Will get deleted link"
+              bodyType: Link
+            400:
+              description: "Link that might be deleted not found"
   # CRON JOB
-  checkExpiredLinks:
-    handler: src/functions/link/checkExpired.handler
+  expireLink:
+    handler: src/functions/link/expireLink.handler
     events:
-      - schedule: rate(1 day)
+      - eventBridge:
+          useCloudFormation: true
+          pattern:
+            source:
+              - handler.createLink
+            detail-type:
+              - Link id
   # EMAIL
   expiredLinkNotification:
     handler: src/functions/link/expiredLinkNotification.handler
@@ -271,7 +265,7 @@ functions:
             Fn::GetAtt:
               - LinkShortnerNotificationQueue
               - Arn
-          batchSize: 1
+          batchSize: 10
 
 resources:
   Resources:
@@ -323,6 +317,7 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: LinkTable
+        BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
@@ -333,9 +328,6 @@ resources:
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
         GlobalSecondaryIndexes:
           - IndexName: UserIdIndex
             KeySchema:
@@ -343,26 +335,9 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
           - IndexName: ExpiredAtIndex
             KeySchema:
               - AttributeName: expiredAt
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
-    # unauthorized:
-    #   Type: "AWS::ApiGateway::GatewayResponse"
-    #   Properties:
-    #     ResponseParameters:
-    #       gatewayresponse.header.Access-Control-Allow-Origin: "'https://link-shortener-8qb2.vercel.app'"
-    #       gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
-    #       gatewayresponse.header.Access-Control-Allow-Methods: "'POST,GET,PUT,PATCH,DELETE,OPTIONS'"
-    #       gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
-    #     ResponseType: UNAUTHORIZED
-    #     RestApiId:
-    #       Ref: "ApiGatewayRestApi"
