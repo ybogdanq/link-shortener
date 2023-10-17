@@ -15,22 +15,6 @@ provider:
       allowCredentials: true
       allowedOrigins:
         - "*"
-      allowedMethods:
-        - GET
-        - OPTIONS
-        - POST
-        - PUT
-        - DELETE
-        - PATCH
-      allowedHeaders:
-        - Content-Type
-        - X-Amz-Date
-        - Authorization
-        - X-Api-Key
-        - X-Amz-Security-Token
-        - X-Amz-User-Agent
-        - X-Transaction-Key
-        - Access-Control-Allow-Origin
   iam:
     role:
       statements:
