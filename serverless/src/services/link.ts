@@ -1,15 +1,37 @@
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import ApiError from "../exceptions/apiError";
 import { dynamodb } from "../utils/clients/db";
-import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { DBTables } from "../types/DBenums";
 import { Link } from "../types/Link";
 
-
 const { AWS_ACCOUNT_ID, SES_REGION } = process.env;
-export const deactivateLinkService = async (
-  linkId: string,
-) => {
+
+interface IGetLinkService {
+  linkId: string;
+  userId: string;
+}
+export const getLinkService = async ({ linkId, userId }: IGetLinkService) => {
+  const linkQueryRes = await dynamodb.send(
+    new QueryCommand({
+      TableName: DBTables.LinkTable,
+      IndexName: "UserIdIndex",
+      KeyConditionExpression: "userId = :userId",
+      FilterExpression: "id = :id",
+      ExpressionAttributeValues: {
+        ":userId": userId,
+        ":id": linkId,
+      },
+    })
+  );
+
+  if (!linkQueryRes.Items || linkQueryRes.Items.length === 0) {
+    throw ApiError.BadRequest("Bad link id provided");
+  }
+  return linkQueryRes.Items[0] as Link;
+};
+
+export const deactivateLinkService = async (linkId: string) => {
   const sqs = new SQSClient();
   const deactivatedLinkRes = await dynamodb.send(
     new UpdateCommand({

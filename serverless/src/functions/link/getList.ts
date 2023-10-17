@@ -1,4 +1,3 @@
-import { errorResponse } from "../../utils/responses/errorResponse";
 import { successResponse } from "../../utils/responses/successResponse";
 import * as middy from "@middy/core";
 import cors from "@middy/http-cors";

@@ -14,13 +14,14 @@ import { EventBridge, PutEventsCommand } from "@aws-sdk/client-eventbridge";
 const { SES_REGION, SES_ACCESS_KEY_ID, SES_SECRET_ACCESS_KEY } = process.env;
 
 export const createLink = async (event) => {
-  const eventbridge = new EventBridge({
-    region: SES_REGION || "",
-    credentials: {
-      accessKeyId: SES_ACCESS_KEY_ID || "",
-      secretAccessKey: SES_SECRET_ACCESS_KEY || "",
-    },
-  });
+  //here's how I was trying to set up one time event bridge
+  // const eventbridge = new EventBridge({
+  //   region: SES_REGION || "",
+  //   credentials: {
+  //     accessKeyId: SES_ACCESS_KEY_ID || "",
+  //     secretAccessKey: SES_SECRET_ACCESS_KEY || "",
+  //   },
+  // });
   const { principalId: userId } = event.requestContext?.authorizer;
   const body = event.body;
   const { redirectLink, numberOfDays, type } = createLinkDto(body);

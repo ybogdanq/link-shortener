@@ -9,6 +9,7 @@ import httpErrorHandler from "@middy/http-error-handler";
 import { dynamodb } from "../../utils/clients/db";
 import { DeleteCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { DBTables } from "../../types/DBenums";
+import { getLinkService } from "../../services/link";
 
 export const deleteLink = async (event) => {
   const { principalId: userId } = event.requestContext?.authorizer;
@@ -18,23 +19,7 @@ export const deleteLink = async (event) => {
     throw ApiError.BadRequest("Bad id provided");
   }
 
-  const linkQueryRes = await dynamodb.send(
-    new QueryCommand({
-      TableName: DBTables.LinkTable,
-      IndexName: "UserIdIndex",
-      KeyConditionExpression: "userId = :userId",
-      FilterExpression: "id = :id",
-      ExpressionAttributeValues: {
-        ":userId": userId,
-        ":id": id,
-      },
-    })
-  );
-
-  if (!linkQueryRes.Items || linkQueryRes.Items.length === 0) {
-    throw ApiError.BadRequest("Bad link id provided");
-  }
-  const linkData = linkQueryRes.Items[0] as Link;
+  const linkData = await getLinkService({ userId, linkId: id });
 
   const deleted = await dynamodb.send(
     new DeleteCommand({
