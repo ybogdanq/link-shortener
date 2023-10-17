@@ -40,10 +40,7 @@ export const deactivateLink: Handler = async (event, context) => {
 
   console.log(context);
 
-  const deactivatedLink = await deactivateLinkService(
-    linkData.id,
-    context.invokedFunctionArn
-  );
+  const deactivatedLink = await deactivateLinkService(linkData.id);
 
   return successResponse({
     event,

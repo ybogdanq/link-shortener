@@ -9,6 +9,7 @@ import httpErrorHandler from "@middy/http-error-handler";
 import { dynamodb } from "../../utils/clients/db";
 import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { DBTables } from "../../types/DBenums";
+import { deactivateLinkService } from "../../services/link";
 
 export const visitLink = async (event) => {
   const { id } = event.pathParameters;
@@ -34,31 +35,24 @@ export const visitLink = async (event) => {
 
   const deactivateCondition =
     linkData.type === "SINGLE" || linkData.expiredAt < currentTimestamp;
-  let conditionalParams;
 
   if (deactivateCondition) {
-    conditionalParams = {
-      UpdateExpression: "set active = :newActive",
-      ExpressionAttributeValues: { ":newActive": false },
-    };
+    await deactivateLinkService(linkData.id);
   } else {
-    conditionalParams = {
-      UpdateExpression: "set visits = :incrementedVisits",
-      ExpressionAttributeValues: {
-        ":incrementedVisits": linkData.visits + 1,
-      },
-    };
+    await dynamodb.send(
+      new UpdateCommand({
+        TableName: DBTables.LinkTable,
+        Key: {
+          id: linkData.id,
+        },
+        UpdateExpression: "set visits = :incrementedVisits",
+        ExpressionAttributeValues: {
+          ":incrementedVisits": linkData.visits + 1,
+        },
+        ReturnValues: "ALL_NEW",
+      })
+    );
   }
-  await dynamodb.send(
-    new UpdateCommand({
-      TableName: DBTables.LinkTable,
-      Key: {
-        id: linkData.id,
-      },
-      ...conditionalParams,
-      ReturnValues: "ALL_NEW",
-    })
-  );
 
   const httpRegex = /^(http|https):\/\//;
 

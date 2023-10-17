@@ -15,6 +15,22 @@ provider:
       allowCredentials: true
       allowedOrigins:
         - "*"
+      allowedMethods:
+        - GET
+        - OPTIONS
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+      allowedHeaders:
+        - Content-Type
+        - X-Amz-Date
+        - Authorization
+        - X-Api-Key
+        - X-Amz-Security-Token
+        - X-Amz-User-Agent
+        - X-Transaction-Key
+        - Access-Control-Allow-Origin
   iam:
     role:
       statements:
@@ -230,16 +246,10 @@ functions:
             400:
               description: "Link that might be deleted not found"
   # CRON JOB
-  expireLink:
-    handler: src/functions/link/expireLink.handler
+  expireLinks:
+    handler: src/functions/link/expireLinks.handler
     events:
-      - eventBridge:
-          useCloudFormation: true
-          pattern:
-            source:
-              - handler.createLink
-            detail-type:
-              - Link id
+      - schedule: rate(2 hours)
   # EMAIL
   expiredLinkNotification:
     handler: src/functions/link/expiredLinkNotification.handler

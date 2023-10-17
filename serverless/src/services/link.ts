@@ -5,9 +5,10 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { DBTables } from "../types/DBenums";
 import { Link } from "../types/Link";
 
+
+const { AWS_ACCOUNT_ID, SES_REGION } = process.env;
 export const deactivateLinkService = async (
   linkId: string,
-  invokedFunctionArn: string
 ) => {
   const sqs = new SQSClient();
   const deactivatedLinkRes = await dynamodb.send(
@@ -32,13 +33,8 @@ export const deactivateLinkService = async (
     throw new Error("Deactivated link id or user id doesn't exist!");
   }
 
-  console.log(invokedFunctionArn);
-
-  const region = invokedFunctionArn.split(":")[3];
-  const accountId = invokedFunctionArn.split(":")[4];
   const queueName: string = "LinkShortnerNotificationQueue";
-
-  const queueUrl: string = `https://sqs.${region}.amazonaws.com/${accountId}/${queueName}`;
+  const queueUrl: string = `https://sqs.${SES_REGION}.amazonaws.com/${AWS_ACCOUNT_ID}/${queueName}`;
 
   await sqs.send(
     new SendMessageCommand({

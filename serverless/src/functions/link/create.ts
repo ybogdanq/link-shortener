@@ -25,7 +25,7 @@ export const createLink = async (event) => {
   const body = event.body;
   const { redirectLink, numberOfDays, type } = createLinkDto(body);
 
-  const expirationTimestamp = Date.now() + numberOfDays * 24 * 60 * 60 * 1000;
+  const expirationTimestamp = Math.floor(Date.now() + numberOfDays * 24 * 60 * 60 * 1000);
 
   const newLink: Link = {
     id: v4().split("").splice(0, 6).join(""),
