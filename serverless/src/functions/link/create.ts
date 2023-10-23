@@ -9,24 +9,29 @@ import jsonBodyParser from "@middy/http-json-body-parser";
 import httpErrorHandler from "@middy/http-error-handler";
 import { dynamodb } from "../../utils/clients/db";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
-import { EventBridge, PutEventsCommand } from "@aws-sdk/client-eventbridge";
+import {
+  CreateScheduleCommand,
+  SchedulerClient,
+} from "@aws-sdk/client-scheduler";
+import { dateToCron } from "../../utils/dateToCron";
 
 const { SES_REGION, SES_ACCESS_KEY_ID, SES_SECRET_ACCESS_KEY } = process.env;
 
 export const createLink = async (event) => {
-  //here's how I was trying to set up one time event bridge
-  // const eventbridge = new EventBridge({
-  //   region: SES_REGION || "",
-  //   credentials: {
-  //     accessKeyId: SES_ACCESS_KEY_ID || "",
-  //     secretAccessKey: SES_SECRET_ACCESS_KEY || "",
-  //   },
-  // });
+  const scheduler = new SchedulerClient({
+    region: SES_REGION || "",
+    credentials: {
+      accessKeyId: SES_ACCESS_KEY_ID || "",
+      secretAccessKey: SES_SECRET_ACCESS_KEY || "",
+    },
+  });
   const { principalId: userId } = event.requestContext?.authorizer;
   const body = event.body;
   const { redirectLink, numberOfDays, type } = createLinkDto(body);
 
-  const expirationTimestamp = Math.floor(Date.now() + numberOfDays * 24 * 60 * 60 * 1000);
+  const expirationTimestamp = Math.floor(
+    Date.now() + numberOfDays * 24 * 60 * 60 * 1000
+  );
 
   const newLink: Link = {
     id: v4().split("").splice(0, 6).join(""),
@@ -42,18 +47,25 @@ export const createLink = async (event) => {
     new PutCommand({ TableName: "LinkTable", Item: newLink })
   );
 
-  // const res = await eventbridge.send(
-  //   new PutEventsCommand({
-  //     Entries: [
-  //       {
-  //         Detail: JSON.stringify({ id: newLink.id }),
-  //         DetailType: "Link id",
-  //         Source: "handler.createLink",
-  //         Time: new Date(expirationTimestamp),
-  //       },
-  //     ],
-  //   })
-  // );
+  const res = scheduler.send(
+    new CreateScheduleCommand({
+      Name: `LinkDeletionSchedule-${newLink.id}`,
+      ScheduleExpression: `at(${dateToCron(expirationTimestamp)})`,
+      FlexibleTimeWindow: {
+        MaximumWindowInMinutes: 60,
+        Mode: "FLEXIBLE",
+      },
+      Target: {
+        Arn: "",
+        RoleArn: "",
+        SqsParameters: {
+          
+        }
+      },
+    })
+  );
+
+  console.log(res);
 
   return successResponse({
     event,
