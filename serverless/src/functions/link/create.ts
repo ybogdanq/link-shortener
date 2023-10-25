@@ -11,13 +11,17 @@ import { dynamodb } from "../../utils/clients/db";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import {
   CreateScheduleCommand,
+  CreateScheduleCommandInput,
   SchedulerClient,
 } from "@aws-sdk/client-scheduler";
 import { dateToCron } from "../../utils/dateToCron";
+import { link } from "fs";
+import { Handler } from "aws-lambda";
 
-const { SES_REGION, SES_ACCESS_KEY_ID, SES_SECRET_ACCESS_KEY } = process.env;
+const { SES_REGION, SES_ACCESS_KEY_ID, SES_SECRET_ACCESS_KEY, AWS_ACCOUNT_ID } =
+  process.env;
 
-export const createLink = async (event) => {
+export const createLink: Handler = async (event) => {
   const scheduler = new SchedulerClient({
     region: SES_REGION || "",
     credentials: {
@@ -47,23 +51,30 @@ export const createLink = async (event) => {
     new PutCommand({ TableName: "LinkTable", Item: newLink })
   );
 
-  const res = scheduler.send(
-    new CreateScheduleCommand({
-      Name: `LinkDeletionSchedule-${newLink.id}`,
-      ScheduleExpression: `at(${dateToCron(expirationTimestamp)})`,
-      FlexibleTimeWindow: {
-        MaximumWindowInMinutes: 60,
-        Mode: "FLEXIBLE",
+  const arn = `arn:aws:lambda:${SES_REGION}:${AWS_ACCOUNT_ID}:function:serverless-dev-deactivateLink`;
+  // const arn = `arn:aws:sqs:eu-west-1:726141157734:LinkShortnerNotificationQueue`;
+  const roleArn = `arn:aws:iam::726141157734:role/serverless-dev-eu-west-1-lambdaRole`;
+
+  const scheduleInput: CreateScheduleCommandInput = {
+    StartDate: new Date(),
+    ActionAfterCompletion: "DELETE",
+    Name: `LinkDeletionSchedule-${newLink.id}`,
+    ScheduleExpression: `at(${dateToCron(expirationTimestamp)})`,
+    ScheduleExpressionTimezone: "Europe/Warsaw",
+    FlexibleTimeWindow: {
+      Mode: "OFF",
+    },
+    Target: {
+      Arn: arn,
+      RoleArn: roleArn,
+      Input: JSON.stringify({ userId: userId, linkId: newLink.id }),
+      RetryPolicy: {
+        MaximumRetryAttempts: 2,
       },
-      Target: {
-        Arn: "",
-        RoleArn: "",
-        SqsParameters: {
-          
-        }
-      },
-    })
-  );
+    },
+  };
+
+  const res = await scheduler.send(new CreateScheduleCommand(scheduleInput));
 
   console.log(res);
 

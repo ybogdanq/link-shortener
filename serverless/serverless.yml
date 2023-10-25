@@ -33,6 +33,8 @@ provider:
         - Access-Control-Allow-Origin
   iam:
     role:
+      managedPolicies:
+        - arn:aws:iam::aws:policy/AmazonEventBridgeSchedulerFullAccess
       statements:
         - Effect: Allow
           Action:
@@ -40,6 +42,10 @@ provider:
             - ses:SendEmail
             - ses:SendRawEmail
             - dynamodb:*
+            - scheduler:*
+            - sts:AssumeRole
+            - lambda:*
+            - events:*
           Resource: "*"
 
 plugins:
@@ -245,11 +251,6 @@ functions:
               bodyType: Link
             400:
               description: "Link that might be deleted not found"
-  # CRON JOB
-  expireLinks:
-    handler: src/functions/link/expireLinks.handler
-    events:
-      - schedule: rate(2 hours)
   # EMAIL
   expiredLinkNotification:
     handler: src/functions/link/expiredLinkNotification.handler

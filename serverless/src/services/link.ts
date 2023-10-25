@@ -32,6 +32,7 @@ export const getLinkService = async ({ linkId, userId }: IGetLinkService) => {
 };
 
 export const deactivateLinkService = async (linkId: string) => {
+  console.log("before sqs");
   const sqs = new SQSClient();
   const deactivatedLinkRes = await dynamodb.send(
     new UpdateCommand({
@@ -58,7 +59,7 @@ export const deactivateLinkService = async (linkId: string) => {
   const queueName: string = "LinkShortnerNotificationQueue";
   const queueUrl: string = `https://sqs.${SES_REGION}.amazonaws.com/${AWS_ACCOUNT_ID}/${queueName}`;
 
-  await sqs.send(
+  const res = await sqs.send(
     new SendMessageCommand({
       QueueUrl: queueUrl,
       MessageBody: JSON.stringify({
@@ -67,6 +68,8 @@ export const deactivateLinkService = async (linkId: string) => {
       }),
     })
   );
+
+  console.log(res);
 
   return deactivatedLink;
 };

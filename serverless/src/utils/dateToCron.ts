@@ -1,11 +1,9 @@
-export const dateToCron = (timestamp: number): string => {
-  const date = new Date(timestamp);
-  const year = date.getFullYear();
-  const minutes = date.getMinutes();
-  const hours = date.getUTCHours();
-  const days = date.getDate();
-  const months = date.getMonth() + 1;
-  const seconds = date.getSeconds();
+import { format } from "date-fns";
 
-  return `${year}-${months}-${days}T${hours}:${minutes}:${seconds}`;
+export const dateToCron = (timestamp: number): string => {
+  return (
+    format(new Date(timestamp), "yyyy-MM-dd") +
+    "T" +
+    format(new Date(timestamp), "HH:mm:ss")
+  );
 };

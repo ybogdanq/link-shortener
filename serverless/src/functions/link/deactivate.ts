@@ -8,15 +8,18 @@ import { Handler } from "aws-lambda";
 import { deactivateLinkService, getLinkService } from "../../services/link";
 
 export const deactivateLink: Handler = async (event, context) => {
-  const { principalId: userId } = event.requestContext?.authorizer;
-
-  const { id } = event.pathParameters;
-  if (!id) {
-    throw ApiError.BadRequest("Bad id provided");
+  const userId = event.requestContext?.authorizer?.principalId || event.userId;
+  const linkId = event.pathParameters?.id || event.linkId;
+  if (!linkId || !userId) {
+    throw ApiError.BadRequest("Bad link id provided or user doesn't exist");
   }
 
-  const linkData = await getLinkService({ userId, linkId: id });
+  console.log({ userId, linkId });
+  console.log("before linkData");
 
+  const linkData = await getLinkService({ userId, linkId: linkId });
+
+  console.log("before deactivatedLink");
   const deactivatedLink = await deactivateLinkService(linkData.id);
 
   return successResponse({
@@ -26,8 +29,4 @@ export const deactivateLink: Handler = async (event, context) => {
   });
 };
 
-export const handler = middy
-  .default(deactivateLink)
-  .use(jsonBodyParser())
-  .use(httpErrorHandler())
-  .use(cors());
+export const handler = deactivateLink;
